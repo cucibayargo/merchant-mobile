@@ -15,10 +15,12 @@ export default {
         },
         android: {
             adaptiveIcon: {
-                foregroundImage: './assets/images/adaptive-icon.png',
+                foregroundImage: './assets/images/logo.png',
                 backgroundColor: '#ffffff',
             },
             edgeToEdgeEnabled: true,
+            package: 'com.byteik.cucibayargo',
+            versionCode: 1,
         },
         web: {
             bundler: 'metro',
@@ -30,7 +32,7 @@ export default {
             [
                 'expo-splash-screen',
                 {
-                    image: './assets/images/splash-icon.png',
+                    image: './assets/images/logo.png',
                     imageWidth: 200,
                     resizeMode: 'contain',
                     backgroundColor: '#ffffff',
@@ -42,6 +44,9 @@ export default {
         },
         extra: {
             API_URL: process.env.API_URL,
+            eas: {
+                projectId: '45a379d1-8bdf-413f-927c-785e4a15d0a1',
+            },
         },
     },
 }

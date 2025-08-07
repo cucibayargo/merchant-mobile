@@ -89,6 +89,7 @@ const Signup = () => {
                 justifyContent: 'center',
                 backgroundColor: 'white',
                 flex: 1,
+                paddingHorizontal: 15,
             }}
         >
             <Spinner visible={isPending} />

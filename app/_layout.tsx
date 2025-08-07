@@ -2,6 +2,9 @@ import { Stack } from 'expo-router'
 import './globals.css'
 import { QueryClient } from '@tanstack/query-core'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { UserProvider } from '@/context/user'
+import { Toaster } from 'sonner'
+// import { UserProvider } from '@/context/user'
 
 export default function RootLayout() {
     // const jwtTokenErrors: string[] = [
@@ -24,20 +27,23 @@ export default function RootLayout() {
 
     return (
         <QueryClientProvider client={queryClient}>
-            <Stack>
-                <Stack.Screen
-                    name="auth/login"
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name="auth/signup"
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name="auth/choosePlan"
-                    options={{ headerShown: false }}
-                />
-            </Stack>
+            <UserProvider>
+                <Toaster position={'top-center'} richColors={true} />
+                <Stack>
+                    <Stack.Screen
+                        name="auth/login"
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name="auth/signup"
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name="auth/choosePlan"
+                        options={{ headerShown: false }}
+                    />
+                </Stack>
+            </UserProvider>
         </QueryClientProvider>
     )
 }

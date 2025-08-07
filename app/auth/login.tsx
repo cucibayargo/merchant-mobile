@@ -17,7 +17,7 @@ import { useRouter } from 'expo-router'
 import useLogin from '@/hooks/auth/useLogin'
 import Spinner from 'react-native-loading-spinner-overlay'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import useUserDetails from '@/hooks/user/getUserDetails'
+import useUserDetails from '@/hooks/user/useUserDetails'
 
 const Login = () => {
     const router = useRouter()
