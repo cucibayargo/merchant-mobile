@@ -1,12 +1,9 @@
 import { Stack } from 'expo-router'
-import '@/app/globals.css'
 import { GluestackUIProvider } from '@/components/ui/gluestack-ui-provider'
 import './globals.css'
 import { QueryClient } from '@tanstack/query-core'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { UserProvider } from '@/context/user'
-import { Toaster } from 'sonner'
-// import { UserProvider } from '@/context/user'
 
 export default function RootLayout() {
     // const jwtTokenErrors: string[] = [
@@ -31,7 +28,6 @@ export default function RootLayout() {
         <GluestackUIProvider mode="light">
             <QueryClientProvider client={queryClient}>
                 <UserProvider>
-                    <Toaster position={'top-center'} richColors={true} />
                     <Stack>
                         <Stack.Screen
                             name="auth/login"
