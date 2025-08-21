@@ -3,6 +3,11 @@
     "version": ">= 0.52.0"
   },
   "build": {
+    "debug-apk": {
+      "android": {
+        "gradleCommand": ":app:assembleDebug"
+      }
+    },
     "development": {
       "developmentClient": true,
       "distribution": "internal",

@@ -20,7 +20,7 @@ const useLogin = () => {
         onSuccess: () => {
             // localStorage.setItem('activeMenu', 'order/ongoing')
             setTimeout(() => {
-                router.push('/')
+                router.push('/settings/duration')
                 queryClient.invalidateQueries({
                     queryKey: ['orders'],
                 })
