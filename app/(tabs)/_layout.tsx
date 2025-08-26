@@ -1,5 +1,5 @@
 import React from 'react'
-import { ScrollText, House } from 'lucide-react-native'
+import { ScrollText, House, ClipboardPlus, User } from 'lucide-react-native'
 import { Tabs } from 'expo-router'
 
 const MainTabNavigator = () => {
@@ -22,6 +22,18 @@ const MainTabNavigator = () => {
                         ) : (
                             <ScrollText size={size} color={color} />
                         )
+                    } else if (route.name === 'createOrder') {
+                        icon = focused ? (
+                            <ClipboardPlus size={size} color={color} />
+                        ) : (
+                            <ClipboardPlus size={size} color={color} />
+                        )
+                    } else if (route.name === 'profile') {
+                        icon = focused ? (
+                            <User size={size} color={color} />
+                        ) : (
+                            <User size={size} color={color} />
+                        )
                     }
 
                     return icon
@@ -39,9 +51,23 @@ const MainTabNavigator = () => {
             />
 
             <Tabs.Screen
+                name="createOrder"
+                options={{
+                    title: 'Buat Baru',
+                }}
+            />
+
+            <Tabs.Screen
                 name="order"
                 options={{
                     title: 'Order',
+                }}
+            />
+
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    title: 'Profil',
                 }}
             />
         </Tabs>

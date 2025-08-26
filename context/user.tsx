@@ -1,21 +1,36 @@
-import React, { useState } from 'react'
+import React, { createContext, useContext, useState } from 'react'
 
-export const UserContext = React.createContext<any>(null)
+interface User {
+    id: string
+    name: string
+    email: string
+    role: string
+}
 
-export const UserProvider: React.FunctionComponent<IUserProps> = ({
+interface UserContextType {
+    user: User | null
+    setUser: (user: User | null) => void
+}
+
+const UserContext = createContext<UserContextType | undefined>(undefined)
+
+export const useUser = () => {
+    const context = useContext(UserContext)
+    if (!context) {
+        throw new Error('useUser must be used within a UserProvider')
+    }
+    return context
+}
+
+export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
-}: IUserProps) => {
-    const [userDetails, setUserDetails] = useState<IUserDetails>()
-    // JSON.parse(localStorage.getItem('userDetails')!)
+}) => {
+    const [user, setUser] = useState<User | null>(null)
 
-    return (
-        <UserContext.Provider
-            value={{
-                userDetails,
-                setUserDetails,
-            }}
-        >
-            {children}
-        </UserContext.Provider>
-    )
+    const value = {
+        user,
+        setUser,
+    }
+
+    return <UserContext.Provider value={value}>{children}</UserContext.Provider>
 }
