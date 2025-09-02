@@ -10,15 +10,14 @@ const useGetOrders = (props: IGetOrdersProps) => {
     url = generateUrlWithParams(url, props)
     const [q, setQ] = useState('')
     const debouncedQ = useDebounce(q, 1000)
-    console.log(url)
 
     return useQuery({
         queryKey: ['orders', props],
         queryFn: async () => axiosInstance.get(url),
-        staleTime: Infinity,
+        // staleTime: Infinity,
         throwOnError: true,
         enabled: debouncedQ.trim().length > 0,
-        placeholderData: keepPreviousData,
+        // placeholderData: keepPreviousData,
     })
 }
 

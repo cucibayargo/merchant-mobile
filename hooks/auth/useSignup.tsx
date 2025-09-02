@@ -23,7 +23,7 @@ const useSignup = () => {
         },
 
         onSuccess: async () => {
-            router.push('')
+            router.push('/(tabs)/home')
             await AsyncStorage.removeItem('signupData')
             await AsyncStorage.removeItem('userDetails')
 

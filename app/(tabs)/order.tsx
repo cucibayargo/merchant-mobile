@@ -7,6 +7,7 @@ import {
     RefreshControl,
     Image,
     StyleSheet,
+    ActivityIndicator,
 } from 'react-native'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
 import OrderCard from '@/components/orderCard'
@@ -14,6 +15,7 @@ import useGetOrders from '@/hooks/order/useGetOrders'
 import { useIsFocused } from '@react-navigation/core'
 import { Searchbar } from 'react-native-paper'
 import noDataIcon from '@/assets/images/no-data.png'
+import Spinner from 'react-native-loading-spinner-overlay'
 
 const TABS: { key: string; label: string }[] = [
     { key: 'Diproses', label: 'Proses' },
@@ -69,6 +71,7 @@ const OrderList = ({ tab, orders, onChangeTab, onRefresh }: OrderListProps) => {
     useEffect(() => {
         if (isFocused) {
             onChangeTab(tab)
+            onRefresh()
         }
     }, [isFocused, tab])
 
@@ -101,6 +104,16 @@ const OrderList = ({ tab, orders, onChangeTab, onRefresh }: OrderListProps) => {
     )
 }
 
+const Loading = () => {
+    return (
+        <View
+            style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
+        >
+            <ActivityIndicator size="large" />
+        </View>
+    )
+}
+
 const Tab = createMaterialTopTabNavigator()
 
 const Order = () => {
@@ -109,7 +122,7 @@ const Order = () => {
     const limit: number = 10
     const [page, setPage] = useState(1)
     const [status, setStatus] = useState<OrderType>('Diproses')
-    const { data, refetch } = useGetOrders({
+    const { data, refetch, isLoading, isRefetching } = useGetOrders({
         status,
         filter,
         limit,
@@ -157,8 +170,11 @@ const Order = () => {
                 <Tab.Screen
                     key={t.key}
                     name={t.label}
+                    options={{ lazyPlaceholder: () => <Loading /> }}
                     children={() => (
                         <>
+                            <Spinner visible={isLoading || isRefetching} />
+
                             <Searchbar
                                 placeholder="Search"
                                 onChangeText={(val: string) => {

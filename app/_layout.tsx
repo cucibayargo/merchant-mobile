@@ -45,19 +45,20 @@ export default function RootLayout() {
                     <QueryClientProvider client={queryClient}>
                         <UserProvider>
                             <Stack screenOptions={{ headerShown: false }}>
-                                {/*<Stack.Screen*/}
-                                {/*    name="auth/login"*/}
-                                {/*    options={{ headerShown: false }}*/}
-                                {/*/>*/}
-                                {/*<Stack.Screen*/}
-                                {/*    name="auth/signup"*/}
-                                {/*    options={{ headerShown: false }}*/}
-                                {/*/>*/}
-                                {/*<Stack.Screen*/}
-                                {/*    name="auth/choosePlan"*/}
-                                {/*    options={{ headerShown: false }}*/}
-                                {/*/>*/}
+                                <Stack.Screen
+                                    name="auth/login"
+                                    options={{ headerShown: false }}
+                                />
+                                <Stack.Screen
+                                    name="auth/signup"
+                                    options={{ headerShown: false }}
+                                />
+                                <Stack.Screen
+                                    name="auth/choosePlan"
+                                    options={{ headerShown: false }}
+                                />
                                 <Stack.Screen name="(tabs)" />
+                                <Stack.Screen name="changePassword" />
                             </Stack>
                         </UserProvider>
                     </QueryClientProvider>

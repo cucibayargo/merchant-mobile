@@ -1,68 +1,68 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
-    View,
     StyleSheet,
     ScrollView,
     Image,
     KeyboardAvoidingView,
     Platform,
     Alert,
-    PermissionsAndroid,
-    Linking,
 } from 'react-native'
-import {
-    Text,
-    TextInput,
-    Button,
-    Surface,
-    ActivityIndicator,
-} from 'react-native-paper'
-import { launchImageLibrary } from 'react-native-image-picker'
+import { Text, Button } from 'react-native-paper'
 import { useUser } from '@/context/user'
-// import api from '../../services/api'
 import * as ImagePicker from 'expo-image-picker'
-import { ImagePickerAsset } from 'expo-image-picker'
 import useUploadLogo from '@/hooks/profile/useUploadLogo'
+import Spinner from 'react-native-loading-spinner-overlay'
+import useUpdateUser from '@/hooks/user/useUpdateUser'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { FormField } from '@/components/formInput'
+import { useRouter } from 'expo-router'
 
-type UpdateUserPayload = {
-    logo?: string
-    name: string
-    email: string
-    phone_number: string
-    address: string
-}
-
-const AccountScreen = () => {
-    const { user, setUser } = useUser()
-
-    const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
-    const [phoneNumber, setPhoneNumber] = useState('')
-    const [address, setAddress] = useState('')
-
+const Profile = () => {
+    const { user } = useUser()
     const [logoUri, setLogoUri] = useState<string>('')
     const [uploadedLogoPath, setUploadedLogoPath] = useState<string>('')
-
-    const [submitting, setSubmitting] = useState(false)
-    const [uploading, setUploading] = useState(false)
-    const [loading, setLoading] = useState(false)
-    const { mutateAsync: uploadLogo } = useUploadLogo()
-
-    const canSubmit = useMemo(() => {
-        return !!name && !!email && !!phoneNumber
-    }, [name, email, phoneNumber])
+    const {
+        mutateAsync: uploadLogo,
+        isPending: isUploadLogoPending,
+        isSuccess,
+    } = useUploadLogo()
+    const { mutateAsync: updateUser, isPending: isUpdateUserPending } =
+        useUpdateUser()
+    const formSchema = z.object({
+        logo: z.any(),
+        name: z.string().min(1, { message: 'Nama wajib diisi' }),
+        email: z
+            .string()
+            .min(1, { message: 'Email wajib diisi' })
+            .email({ message: 'Alamat email tidak valid' }),
+        phone_number: z.string().min(1, { message: 'No HP wajib diisi' }),
+        address: z.any(),
+    })
+    const {
+        control,
+        handleSubmit,
+        reset,
+        formState: { isSubmitting, isValid },
+    } = useForm<ProfileForm>({
+        resolver: zodResolver(formSchema),
+        defaultValues: { email: '', name: '', address: '' },
+        mode: 'onChange',
+    })
+    const router = useRouter()
 
     useEffect(() => {
-        setLoading(true)
-        try {
-            if (user) {
-                setName(user.name || '')
-                setEmail(user.email || '')
-            }
-        } finally {
-            setLoading(false)
+        if (user) {
+            reset({ ...user, logo: '' })
         }
     }, [user])
+
+    useEffect(() => {
+        if (isSuccess) {
+            console.log('success upload image')
+        }
+    }, [isSuccess])
 
     const requestAndroidGalleryPermission = async () => {
         if (Platform.OS !== 'android') return true
@@ -79,20 +79,18 @@ const AccountScreen = () => {
 
         // 2) Launch system picker
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: false,
+            base64: true,
             quality: 1,
         })
         if (result.canceled) return { ok: false, reason: 'canceled' }
 
-        return result.assets[0]
+        return `data:${result.assets[0].mimeType ?? 'image/jpeg'};base64,${result.assets[0].base64}`
     }
 
     const handlePickLogo = async () => {
         if (Platform.OS === 'android') {
             console.log('android')
-            const file: ImagePickerAsset =
-                await requestAndroidGalleryPermission()
+            const file: any = await requestAndroidGalleryPermission()
             if (!file) {
                 Alert.alert(
                     'Izin Ditolak',
@@ -101,60 +99,13 @@ const AccountScreen = () => {
                 return
             }
 
-            console.log(file)
-            setLogoUri(file.uri)
-            setUploading(true)
+            uploadLogo(file)
         }
     }
 
-    const handleSave = async () => {
-        if (!user?.id) {
-            Alert.alert('Gagal', 'Data pengguna tidak ditemukan.')
-            return
-        }
-        if (!canSubmit) {
-            Alert.alert('Validasi', 'Nama, Email, dan No HP wajib diisi.')
-            return
-        }
-
-        setSubmitting(true)
-        try {
-            const payload: UpdateUserPayload = {
-                logo: uploadedLogoPath || undefined,
-                name,
-                email,
-                phone_number: phoneNumber,
-                address,
-            }
-
-            // const response = await api.put(`/user/${user.id}`, payload)
-            // const updatedUser =
-            //     response?.data?.data?.user || response?.data?.user
-            // if (updatedUser) {
-            //     setUser(updatedUser)
-            //     setUploadedLogoPath('')
-            //     Alert.alert('Sukses', 'Akun berhasil diperbarui.')
-            // } else {
-            //     Alert.alert('Sukses', 'Perubahan disimpan.')
-            // }
-        } catch (error: any) {
-            Alert.alert(
-                'Gagal',
-                error?.response?.data?.message ||
-                    'Tidak dapat menyimpan perubahan.'
-            )
-        } finally {
-            setSubmitting(false)
-        }
-    }
-
-    if (loading) {
-        return (
-            <View style={styles.centered}>
-                <ActivityIndicator size="large" />
-                <Text style={styles.centeredText}>Memuat...</Text>
-            </View>
-        )
+    const handleSave = async (data: ProfileForm) => {
+        const payload = { ...data, logo: '' }
+        updateUser({ id: user?.id ?? '', payload })
     }
 
     return (
@@ -162,6 +113,8 @@ const AccountScreen = () => {
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
+            <Spinner visible={isUploadLogoPending || isUpdateUserPending} />
+
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <Button
                     mode="outlined"
@@ -178,57 +131,54 @@ const AccountScreen = () => {
                         <Text>Upload Logo</Text>
                     )}
                 </Button>
-                {uploading ? (
-                    <Text style={styles.helperText}>Mengunggah logo...</Text>
-                ) : uploadedLogoPath ? (
-                    <Text style={styles.helperText}>Logo siap disimpan</Text>
-                ) : null}
 
-                <TextInput
-                    label="Nama"
-                    value={name}
-                    onChangeText={setName}
-                    mode="outlined"
-                    style={[styles.input, styles.inputText]}
-                />
-
-                <TextInput
+                <FormField.PaperInput<ProfileForm, 'email'>
+                    control={control}
+                    name="email"
                     label="Email"
-                    value={email}
-                    onChangeText={setEmail}
-                    mode="outlined"
                     autoCapitalize="none"
-                    keyboardType="email-address"
-                    style={styles.input}
+                    rules={{ required: 'Email wajib diisi' }}
                 />
 
-                <TextInput
-                    label="No HP"
-                    value={phoneNumber}
-                    onChangeText={setPhoneNumber}
-                    mode="outlined"
+                <FormField.PaperInput<ProfileForm, 'name'>
+                    control={control}
+                    name="name"
+                    label="Nama"
+                    autoCapitalize="none"
+                    rules={{ required: 'Nama wajib diisi' }}
+                />
+
+                <FormField.PaperInput<ProfileForm, 'phone_number'>
+                    control={control}
+                    name="phone_number"
+                    label="No Hp"
+                    autoCapitalize="none"
                     keyboardType="phone-pad"
-                    style={styles.input}
+                    maxLength={15}
+                    textContentType="telephoneNumber"
+                    rules={{ required: 'No Hp wajib diisi' }}
                 />
 
-                <TextInput
+                <FormField.PaperInput<ProfileForm, 'address'>
+                    control={control}
+                    name="address"
                     label="Alamat"
-                    value={address}
-                    onChangeText={setAddress}
-                    mode="outlined"
-                    multiline
-                    numberOfLines={3}
-                    style={styles.input}
+                    autoCapitalize="none"
                 />
 
                 <Button
                     mode="contained"
-                    onPress={handleSave}
-                    disabled={submitting || uploading || !canSubmit}
-                    loading={submitting}
                     style={styles.submitButton}
+                    onPress={handleSubmit(handleSave)}
                 >
                     Simpan
+                </Button>
+
+                <Button
+                    mode="contained"
+                    onPress={() => router.push('/changePassword')}
+                >
+                    Ubah Password
                 </Button>
             </ScrollView>
         </KeyboardAvoidingView>
@@ -269,7 +219,7 @@ const styles = StyleSheet.create({
         backgroundColor: 'transparent',
     },
     submitButton: {
-        marginTop: 4,
+        marginBottom: 8,
     },
     centered: {
         flex: 1,
@@ -286,4 +236,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default AccountScreen
+export default Profile

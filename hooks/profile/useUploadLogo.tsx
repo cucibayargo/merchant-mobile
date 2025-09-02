@@ -7,19 +7,30 @@ const useUploadLogo = () => {
 
     return useMutation({
         mutationKey: ['userUploadLogo'],
-        mutationFn: async (logo: File) => {
+        mutationFn: async (file: File) => {
+            // const res = await fetch(uri)
+            // const blob = await res.blob()
+            // const base64 = await FileSystem.readAsStringAsync(uri, {
+            //     encoding: FileSystem.EncodingType.Base64,
+            // })
+            // return `data:${mime};base64,${base64}`
             const formData = new FormData()
-            formData.append('file', logo)
+            formData.append('file', file)
+            // console.log(file)
 
             return axiosInstance.post(url, formData, {
                 headers: { 'content-type': 'multipart/form-data' },
             })
         },
         onSuccess: () => {
+            alert('success upload image')
             // toast({
             //     description: 'Logo berhasil diuanggah',
             //     variant: 'success',
             // })
+        },
+        onError: (e) => {
+            console.log('error upload image', e.message)
         },
     })
 }

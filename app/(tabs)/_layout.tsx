@@ -9,30 +9,37 @@ const MainTabNavigator = () => {
                 tabBarIcon: ({ focused, color, size }) => {
                     let icon
 
-                    console.log(route)
                     if (route.name === 'home') {
                         icon = focused ? (
                             <House size={size} color={color} />
                         ) : (
-                            <House size={size} color={color} />
+                            <House size={size} color={color} strokeWidth={1} />
                         )
                     } else if (route.name === 'order') {
                         icon = focused ? (
                             <ScrollText size={size} color={color} />
                         ) : (
-                            <ScrollText size={size} color={color} />
+                            <ScrollText
+                                size={size}
+                                color={color}
+                                strokeWidth={1}
+                            />
                         )
                     } else if (route.name === 'createOrder') {
                         icon = focused ? (
                             <ClipboardPlus size={size} color={color} />
                         ) : (
-                            <ClipboardPlus size={size} color={color} />
+                            <ClipboardPlus
+                                size={size}
+                                color={color}
+                                strokeWidth={1}
+                            />
                         )
                     } else if (route.name === 'profile') {
                         icon = focused ? (
                             <User size={size} color={color} />
                         ) : (
-                            <User size={size} color={color} />
+                            <User size={size} color={color} strokeWidth={1} />
                         )
                     }
 

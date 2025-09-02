@@ -1,15 +1,8 @@
 import React, { createContext, useContext, useState } from 'react'
 
-interface User {
-    id: string
-    name: string
-    email: string
-    role: string
-}
-
 interface UserContextType {
-    user: User | null
-    setUser: (user: User | null) => void
+    user: IUserDetails | null
+    setUser: (user: IUserDetails | null) => void
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined)
@@ -25,7 +18,7 @@ export const useUser = () => {
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
     children,
 }) => {
-    const [user, setUser] = useState<User | null>(null)
+    const [user, setUser] = useState<IUserDetails | null>(null)
 
     const value = {
         user,

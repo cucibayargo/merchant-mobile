@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     View,
     Text,
@@ -17,7 +17,9 @@ import { useRouter } from 'expo-router'
 import useLogin from '@/hooks/auth/useLogin'
 import Spinner from 'react-native-loading-spinner-overlay'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import useUserDetails from '@/hooks/user/useUserDetails'
+import useGetUserDetails from '@/hooks/user/useGetUserDetails'
+import { useUser } from '@/context/user'
+import { FormField } from '@/components/formInput'
 
 const Login = () => {
     const router = useRouter()
@@ -26,12 +28,7 @@ const Login = () => {
         isPending,
         // isSuccess: isLoginSuccess,
     } = useLogin()
-    const {
-        // mutateAsync: getUserDetails,
-        isPending: isPendingUserDetails,
-        // data: userDetails,
-        // isSuccess,
-    } = useUserDetails()
+
     const formSchema = z.object({
         email: z.string().min(1, { message: 'Email wajib diisi' }).email(),
         password: z.string().min(1, { message: 'Password wajib diisi' }),
@@ -40,11 +37,12 @@ const Login = () => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email: '',
-            password: '',
+            email: 'Yoo@rama.com',
+            password: 'Pass1234',
         },
         mode: 'onBlur',
     })
+    const { user } = useUser()
 
     const styles = StyleSheet.create({
         logo: {
@@ -55,6 +53,13 @@ const Login = () => {
         },
     })
 
+    useEffect(() => {
+        console.log('user', user)
+        if (user) {
+            router.replace('/home')
+        }
+    }, [])
+
     const onSubmit = (data: z.infer<typeof formSchema>) => {
         console.log('data', data)
         login(data)
@@ -63,7 +68,7 @@ const Login = () => {
     return (
         <SafeAreaProvider>
             <SafeAreaView className="flex justify-center px-4 bg-white h-screen">
-                <Spinner visible={isPending || isPendingUserDetails} />
+                <Spinner visible={isPending} />
 
                 <Image
                     source={images.loginLogo}
@@ -71,55 +76,19 @@ const Login = () => {
                     style={styles.logo}
                 />
 
-                <View className="mb-5">
-                    <Controller
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                            <View>
-                                <Text>Email</Text>
-                                <TextInput
-                                    className="border rounded mt-2"
-                                    placeholder="Enter your name"
-                                    onChangeText={(value) =>
-                                        field.onChange(value)
-                                    }
-                                />
+                <FormField.PaperInput<LoginForm, 'email'>
+                    control={form.control}
+                    name="email"
+                    label="Email"
+                    autoCapitalize="none"
+                />
 
-                                {form.formState.errors.email && (
-                                    <Text className="text-red-500 text-xs">
-                                        {form.formState.errors.email.message}
-                                    </Text>
-                                )}
-                            </View>
-                        )}
-                    ></Controller>
-                </View>
-
-                <View className="mb-5">
-                    <Controller
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                            <View>
-                                <Text>Password</Text>
-                                <TextInput
-                                    className="border rounded mt-2"
-                                    placeholder="Enter your password"
-                                    secureTextEntry={true}
-                                    onChangeText={(value) =>
-                                        field.onChange(value)
-                                    }
-                                />
-                                {form.formState.errors.password && (
-                                    <Text className="text-red-500 text-xs">
-                                        {form.formState.errors.password.message}
-                                    </Text>
-                                )}
-                            </View>
-                        )}
-                    ></Controller>
-                </View>
+                <FormField.PaperPassword<LoginForm, 'password'>
+                    control={form.control}
+                    name="password"
+                    label="Password"
+                    autoCapitalize="none"
+                />
 
                 <Button
                     data-id="button-login"
