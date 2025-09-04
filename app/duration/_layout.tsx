@@ -9,7 +9,7 @@ export default function SettingsLayout() {
                 options={{ title: 'Pengaturan Durasi' }}
             />
             <Stack.Screen name="create" options={{ title: 'Tambah Durasi' }} />
-            <Stack.Screen name="[id]" options={{ title: 'Detail Durasi' }} />
+            <Stack.Screen name="[id]" options={{ title: 'Edit Durasi' }} />
         </Stack>
     )
 }

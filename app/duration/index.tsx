@@ -1,7 +1,9 @@
+import CustomSearchBar from '@/components/customSearchBar'
 import { BreadcrumbContext } from '@/context/breadcrumb'
-import axiosInstance from '@/libs/axios'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import useDeleteDuration from '@/hooks/duration/useDeleteDuration'
+import useGetDuration from '@/hooks/duration/useGetDuration'
 import { useRouter } from 'expo-router'
+import { Trash2 } from 'lucide-react-native'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
 import {
     ActivityIndicator,
@@ -9,11 +11,10 @@ import {
     FlatList,
     SafeAreaView,
     Text,
-    TextInput,
     TouchableOpacity,
     View,
 } from 'react-native'
-import { DeleteIcon } from 'lucide-react'
+import { Card } from 'react-native-paper'
 
 interface IDuration {
     id: string
@@ -41,6 +42,8 @@ export default function DurationIndex() {
     const [isLastPage, setIsLastPage] = useState<boolean>(false)
     const [isFirstPage, setIsFirstPage] = useState<boolean>(true)
     const [loadingMore, setLoadingMore] = useState<boolean>(false)
+    const { mutateAsync: deleteDuration, isSuccess: isDeleteDurationSuccess } =
+        useDeleteDuration()
 
     useEffect(() => {
         setShowTitle(true)
@@ -49,50 +52,34 @@ export default function DurationIndex() {
         setPrevPath('settings')
     }, [])
 
-    const fetchDurations = async (): Promise<GetDurationResponse> => {
-        const res = await axiosInstance.get('/duration', {
-            params: { filter, page, limit },
-        })
-
-        const payload = (res.data?.data ?? res.data) as GetDurationResponse
-        return {
-            durations: payload.durations ?? [],
-            isLastPage: Boolean(payload.isLastPage),
-            isFirstPage: Boolean(payload.isFirstPage),
-        }
-    }
-
-    const { data, isLoading, refetch, isFetching } = useQuery({
-        queryKey: ['durations', { filter, page, limit }],
-        queryFn: fetchDurations,
-    })
-
-    const deleteMutation = useMutation({
-        mutationKey: ['deleteDuration'],
-        mutationFn: async (id: string) =>
-            axiosInstance.delete(`/duration/${id}`),
-        onSuccess: () => {
-            setPage(1)
-            refetch()
-        },
+    const { data, isLoading, refetch, isRefetching } = useGetDuration({
+        filter,
+        page,
+        limit,
     })
 
     useEffect(() => {
-        if (!data) return
-        if (page === 1) {
-            setDurations(data.durations)
-        } else {
-            setDurations((prev) => [...prev, ...data.durations])
+        if (data) {
+            setDurations(
+                page === 1
+                    ? data.data.durations
+                    : [...durations, ...data.data.durations]
+            )
+            setLoadingMore(false)
+            setIsLastPage(data.data.isLastPage)
+            setIsFirstPage(data.data.isFirstPage)
+
+            if (page !== 1) {
+                window.scrollTo(0, 0)
+            }
         }
-        setIsLastPage(data.isLastPage)
-        setIsFirstPage(data.isFirstPage)
-        setLoadingMore(false)
     }, [data])
 
-    const onSubmitSearch = () => {
-        setPage(1)
-        refetch()
-    }
+    useEffect(() => {
+        if (isDeleteDurationSuccess) {
+            refetch()
+        }
+    }, [isDeleteDurationSuccess])
 
     const loadMore = () => {
         if (loadingMore || isLastPage) return
@@ -101,55 +88,73 @@ export default function DurationIndex() {
     }
 
     const navigateToCreate = () =>
-        router.push({ pathname: '/settings/duration/create' } as never)
+        router.push({ pathname: '/duration/create' } as never)
 
     const navigateToDetail = (id: string) =>
         router.push({
-            pathname: '/settings/duration/[id]',
+            pathname: '/duration/[id]',
             params: { id },
         } as never)
 
-    const confirmDelete = useCallback((id: string) => {
-        Alert.alert('Hapus Durasi?', 'Tindakan ini tidak dapat dibatalkan.', [
-            { text: 'Batal', style: 'cancel' },
-            {
-                text: 'Hapus',
-                style: 'destructive',
-                onPress: () => deleteMutation.mutate(id),
-            },
-        ])
+    const confirmDelete = useCallback((duration: IDuration) => {
+        Alert.alert(
+            'Hapus Durasi?',
+            `Anda yakin menghapus durasi ${duration.name}`,
+            [
+                { text: 'Batal', style: 'cancel' },
+                {
+                    text: 'Hapus',
+                    style: 'destructive',
+                    onPress: () => deleteDuration(duration.id),
+                },
+            ]
+        )
     }, [])
 
     const renderItem = ({ item }: { item: IDuration }) => (
-        <View className="flex-row items-center justify-between border border-gray-400 rounded mb-2 px-3 py-3 bg-white">
-            <TouchableOpacity
-                className="flex-1 mr-3"
-                onPress={() => navigateToDetail(item.id)}
-            >
-                <Text className="font-bold">{item.name}</Text>
-                <Text className="text-[10px]">
-                    {item.duration} {item.type}
-                </Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => confirmDelete(item.id)}>
-                {/*<DeleteIcon />*/}
-            </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+            onPress={() => navigateToDetail(item.id)}
+            style={{ marginBottom: 10 }}
+        >
+            <Card>
+                <Card.Content
+                    style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                    }}
+                >
+                    <View>
+                        <Text style={{ fontWeight: '600', marginBottom: 5 }}>
+                            {item.name}
+                        </Text>
+                        <Text>
+                            {item.duration} {item.type}
+                        </Text>
+                    </View>
+
+                    <Trash2
+                        color={'#a33929'}
+                        style={{ marginVertical: 'auto' }}
+                        onPress={() => confirmDelete(item)}
+                    />
+                </Card.Content>
+            </Card>
+        </TouchableOpacity>
     )
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <SafeAreaView
+            className="flex-1 bg-white"
+            style={{ backgroundColor: '#f0eeeb' }}
+        >
             <View className="px-4 pt-4">
-                <TextInput
-                    placeholder="Pencarian"
-                    className="border rounded px-3 py-2"
-                    value={filter}
-                    onChangeText={setFilter}
-                    onSubmitEditing={onSubmitSearch}
-                    returnKeyType="search"
+                <CustomSearchBar
+                    placeholder="Cari durasi..."
+                    query={filter}
+                    onSearch={setFilter}
                 />
 
-                {(isLoading || (isFetching && page === 1)) && (
+                {(isLoading || (isRefetching && page === 1)) && (
                     <View className="mt-6">
                         <ActivityIndicator />
                     </View>

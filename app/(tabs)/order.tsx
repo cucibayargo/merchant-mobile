@@ -1,20 +1,20 @@
 // StatusTabs.tsx
-import React, { useEffect, useState } from 'react'
-import {
-    View,
-    Text,
-    FlatList,
-    RefreshControl,
-    Image,
-    StyleSheet,
-    ActivityIndicator,
-} from 'react-native'
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
+import noDataIcon from '@/assets/images/no-data.png'
+import CustomSearchBar from '@/components/customSearchBar'
 import OrderCard from '@/components/orderCard'
 import useGetOrders from '@/hooks/order/useGetOrders'
 import { useIsFocused } from '@react-navigation/core'
-import { Searchbar } from 'react-native-paper'
-import noDataIcon from '@/assets/images/no-data.png'
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
+import React, { useEffect, useState } from 'react'
+import {
+    ActivityIndicator,
+    FlatList,
+    Image,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    View,
+} from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
 
 const TABS: { key: string; label: string }[] = [
@@ -92,7 +92,7 @@ const OrderList = ({ tab, orders, onChangeTab, onRefresh }: OrderListProps) => {
                 />
             )}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={{ padding: 10 }}
+            contentContainerStyle={{ paddingVertical: 10 }}
             refreshControl={
                 <RefreshControl
                     refreshing={refreshing}
@@ -172,16 +172,13 @@ const Order = () => {
                     name={t.label}
                     options={{ lazyPlaceholder: () => <Loading /> }}
                     children={() => (
-                        <>
+                        <View style={{ paddingHorizontal: 10 }}>
                             <Spinner visible={isLoading || isRefetching} />
 
-                            <Searchbar
-                                placeholder="Search"
-                                onChangeText={(val: string) => {
-                                    setFilter(val)
-                                }}
-                                value={filter}
-                                style={styles.searchBar}
+                            <CustomSearchBar
+                                placeholder="Cari order..."
+                                query={filter}
+                                onSearch={setFilter}
                             />
 
                             <OrderList
@@ -190,7 +187,7 @@ const Order = () => {
                                 onChangeTab={changeTabHandler}
                                 onRefresh={refetch}
                             />
-                        </>
+                        </View>
                     )}
                 />
             ))}
@@ -203,6 +200,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
         marginHorizontal: 10,
         backgroundColor: '#fff',
+        height: 10,
     },
 })
 

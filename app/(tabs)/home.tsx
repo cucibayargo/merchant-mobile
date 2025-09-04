@@ -1,20 +1,19 @@
-import { Avatar, Card, Text, TouchableRipple } from 'react-native-paper'
-import { FlatList, Image, StyleSheet, View } from 'react-native'
-import { useUser } from '@/context/user'
-import { Clock10, Users, Shapes } from 'lucide-react-native'
-import { MaterialCommunityIcons } from '@expo/vector-icons'
+import customerIcon from '@/assets/images/customer-icon.png'
+import durationIcon from '@/assets/images/duration-icon.png'
+import moreIcon from '@/assets/images/more-icon.png'
+import noteIcon from '@/assets/images/note-icon.png'
+import reportIcon from '@/assets/images/report-icon.png'
+import serviceIcon from '@/assets/images/service-icon.png'
 import OrderCard from '@/components/orderCard'
-import React, { useEffect, useState } from 'react'
+import { useUser } from '@/context/user'
 import useGetOrders from '@/hooks/order/useGetOrders'
 import { useIsFocused } from '@react-navigation/core'
-import Spinner from 'react-native-loading-spinner-overlay'
 import { useRouter } from 'expo-router'
-import serviceIcon from '@/assets/images/service-icon.png'
-import durationIcon from '@/assets/images/duration-icon.png'
-import customerIcon from '@/assets/images/customer-icon.png'
-import reportIcon from '@/assets/images/report-icon.png'
-import noteIcon from '@/assets/images/note-icon.png'
-import moreIcon from '@/assets/images/more-icon.png'
+import { Clock10, Shapes, Users } from 'lucide-react-native'
+import React, { useEffect, useState } from 'react'
+import { FlatList, Image, StyleSheet, View } from 'react-native'
+import Spinner from 'react-native-loading-spinner-overlay'
+import { Avatar, Card, Text, TouchableRipple } from 'react-native-paper'
 
 type Service = {
     id: string
@@ -120,7 +119,7 @@ const Home = () => {
             badge: 'ONLY6K',
             icon: durationIcon,
             onPress: () => {
-                router.push('/settings/duration')
+                router.push('/duration')
             },
         },
         {

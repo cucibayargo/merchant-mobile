@@ -22,3 +22,10 @@ type RootStackParamList = {
     SubscriptionPayment: { invoice: string }
     WaitingConfirmation: undefined
 }
+
+// Custom Search Bar
+interface ICustomSearchBarProps {
+    placeholder: string
+    query: string
+    onSearch: (query: string) => void
+}

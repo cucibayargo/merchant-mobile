@@ -1,128 +1,75 @@
-import axiosInstance from '@/libs/axios'
+import { FormField } from '@/components/formInput'
+import useCreateDuration from '@/hooks/duration/useCreateDuration'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation } from '@tanstack/react-query'
-import { useRouter } from 'expo-router'
 import React from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import {
-    ActivityIndicator,
-    SafeAreaView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from 'react-native'
+import { useForm } from 'react-hook-form'
+import { SafeAreaView, View } from 'react-native'
+import Spinner from 'react-native-loading-spinner-overlay'
+import { Button } from 'react-native-paper'
 import { z } from 'zod'
 
-const schema = z.object({
-    name: z.string().min(1, { message: 'Nama wajib diisi' }),
-    duration: z
-        .string()
-        .min(1, { message: 'Durasi wajib diisi' })
-        .regex(/^\d+$/, { message: 'Durasi harus angka' }),
-    type: z.string().min(1, { message: 'Tipe wajib diisi' }),
-})
-
-type FormValues = z.infer<typeof schema>
-
 export default function CreateDuration() {
-    const router = useRouter()
-    const form = useForm<FormValues>({
-        resolver: zodResolver(schema),
-        defaultValues: { name: '', duration: '', type: '' },
-        mode: 'onBlur',
+    const formSchema = z.object({
+        name: z.string().min(1, { message: 'Nama wajib diisi' }),
+        duration: z.number().min(1, { message: 'Durasi wajib diisi' }),
+        type: z.string().min(1, { message: 'Tipe wajib diisi' }),
     })
-
-    const mutation = useMutation({
-        mutationKey: ['createDuration'],
-        mutationFn: async (values: FormValues) =>
-            axiosInstance.post('/duration', {
-                ...values,
-                duration: Number(values.duration),
-            }),
-        onSuccess: () => router.replace('/settings/duration'),
+    const { control, handleSubmit } = useForm<CustomForm>({
+        resolver: zodResolver(formSchema),
+        defaultValues: {
+            name: '',
+            duration: 0,
+            type: '',
+        },
+        mode: 'onChange',
     })
+    const { mutateAsync: createDuration, isPending: isPendingCreate } =
+        useCreateDuration()
 
-    const onSubmit = (values: FormValues) => mutation.mutate(values)
+    const handleSave = async (data: ChangePasswordForm) => {
+        createDuration(data)
+    }
 
     return (
         <SafeAreaView className="flex-1 bg-white">
+            <Spinner visible={isPendingCreate} />
+
             <View className="p-4">
-                <View className="mb-4">
-                    <Text>Nama</Text>
-                    <Controller
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                            <TextInput
-                                className="border rounded px-3 py-2"
-                                value={field.value}
-                                onChangeText={field.onChange}
-                            />
-                        )}
-                    />
-                    {form.formState.errors.name && (
-                        <Text className="text-red-500 text-xs">
-                            {form.formState.errors.name.message}
-                        </Text>
-                    )}
-                </View>
+                <FormField.PaperInput<CustomForm, 'name'>
+                    control={control}
+                    name="name"
+                    label="Nama"
+                    autoCapitalize="none"
+                />
 
-                <View className="mb-4">
-                    <Text>Durasi</Text>
-                    <Controller
-                        control={form.control}
-                        name="duration"
-                        render={({ field }) => (
-                            <TextInput
-                                className="border rounded px-3 py-2"
-                                value={field.value}
-                                keyboardType="number-pad"
-                                onChangeText={field.onChange}
-                            />
-                        )}
-                    />
-                    {form.formState.errors.duration && (
-                        <Text className="text-red-500 text-xs">
-                            {form.formState.errors.duration.message}
-                        </Text>
-                    )}
-                </View>
+                <FormField.PaperNumber<CustomForm, 'duration'>
+                    control={control}
+                    name="duration"
+                    label="Durasi"
+                    precision={0}
+                    min={1}
+                />
 
-                <View className="mb-4">
-                    <Text>Tipe</Text>
-                    <Controller
-                        control={form.control}
-                        name="type"
-                        render={({ field }) => (
-                            <TextInput
-                                className="border rounded px-3 py-2"
-                                value={field.value}
-                                onChangeText={field.onChange}
-                            />
-                        )}
-                    />
-                    {form.formState.errors.type && (
-                        <Text className="text-red-500 text-xs">
-                            {form.formState.errors.type.message}
-                        </Text>
-                    )}
-                </View>
+                <FormField.PaperSelect<CustomForm, 'type'>
+                    control={control}
+                    name="type"
+                    label="Tipe"
+                    options={[
+                        {
+                            value: 'Jam',
+                            label: 'Jam',
+                        },
+                        {
+                            value: 'Hari',
+                            label: 'Hari',
+                        },
+                    ]}
+                />
 
-                <TouchableOpacity
-                    className="bg-blue-600 rounded px-4 py-3 items-center"
-                    onPress={form.handleSubmit(onSubmit)}
-                    disabled={mutation.isPending}
-                >
-                    {mutation.isPending ? (
-                        <ActivityIndicator color="#fff" />
-                    ) : (
-                        <Text className="text-white">Simpan</Text>
-                    )}
-                </TouchableOpacity>
+                <Button mode="contained" onPress={handleSubmit(handleSave)}>
+                    Simpan
+                </Button>
             </View>
         </SafeAreaView>
     )
 }
-
-
