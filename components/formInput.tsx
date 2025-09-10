@@ -592,7 +592,6 @@ FormField.PaperSelect = function PaperSelectField<
             rules={rules}
             render={({ field, fieldState }) => {
                 const [open, setOpen] = React.useState(false)
-                // tolerant match for number/string value
                 const selected = options.find(
                     (o) => String(o.value) === String(field.value)
                 )

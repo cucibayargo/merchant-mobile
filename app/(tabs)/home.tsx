@@ -112,6 +112,9 @@ const Home = () => {
             title: 'Layanan',
             badge: 'ONLY5K',
             icon: serviceIcon,
+            onPress: () => {
+                router.push('/service')
+            },
         },
         {
             id: 'duration',

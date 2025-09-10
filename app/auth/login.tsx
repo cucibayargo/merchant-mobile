@@ -37,7 +37,7 @@ const Login = () => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email: 'Yoo@rama.com',
+            email: 'Yoo2@rama.com',
             password: 'Pass1234',
         },
         mode: 'onBlur',

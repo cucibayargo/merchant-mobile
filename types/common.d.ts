@@ -29,3 +29,9 @@ interface ICustomSearchBarProps {
     query: string
     onSearch: (query: string) => void
 }
+
+// Dropdown
+interface IDropdown {
+    value: string
+    label: string
+}
