@@ -828,3 +828,124 @@ FormField.PaperMultiSelect = function PaperMultiSelectField<
         />
     )
 }
+
+// ---- TextArea (multiline with autoGrow & counter) ----
+FormField.PaperTextArea = function PaperTextAreaField<
+    T extends FieldValues,
+    N extends Path<T>,
+>(
+    props: BaseProps<T, N> &
+        Omit<
+            React.ComponentProps<typeof PaperInput>,
+            'value' | 'onChangeText' | 'error' | 'multiline' | 'numberOfLines'
+        > & {
+            rows?: number // initial visible lines (default 4)
+            autoGrow?: boolean // grow with content (default true)
+            minHeight?: number // px (optional)
+            maxHeight?: number // px (optional)
+            showCounter?: boolean // show x / maxLength (default: true when maxLength is set)
+        }
+) {
+    const {
+        control,
+        name,
+        rules,
+        description,
+        spacing = 14,
+        rows = 4,
+        autoGrow = true,
+        minHeight,
+        maxHeight,
+        showCounter,
+        style,
+        ...inputProps
+    } = props
+
+    const baseLineHeight = 22 // rough line height for initial calc
+    const initialHeight =
+        minHeight ?? Math.max(48, rows * baseLineHeight + 12 /*padding*/)
+
+    return (
+        <Controller
+            control={control}
+            name={name}
+            rules={rules}
+            render={({ field, fieldState }) => {
+                const [height, setHeight] =
+                    React.useState<number>(initialHeight)
+                const counterEnabled =
+                    showCounter ??
+                    typeof (inputProps as any).maxLength === 'number'
+                const valueStr = (field.value ?? '') as string
+                const maxLen = (inputProps as any).maxLength as
+                    | number
+                    | undefined
+
+                return (
+                    <View style={{ marginBottom: spacing }}>
+                        <PaperInput
+                            mode="outlined"
+                            {...inputProps}
+                            multiline
+                            numberOfLines={rows}
+                            value={valueStr}
+                            onChangeText={field.onChange}
+                            onBlur={field.onBlur}
+                            error={!!fieldState.error}
+                            style={[
+                                {
+                                    textAlignVertical: 'top',
+                                    minHeight: initialHeight,
+                                    height,
+                                },
+                                style as any,
+                            ]}
+                            onContentSizeChange={
+                                autoGrow
+                                    ? (e) => {
+                                          const next = Math.ceil(
+                                              e.nativeEvent.contentSize.height
+                                          )
+                                          const clamped = Math.min(
+                                              maxHeight ?? next,
+                                              Math.max(
+                                                  minHeight ?? initialHeight,
+                                                  next
+                                              )
+                                          )
+                                          setHeight(clamped)
+                                      }
+                                    : undefined
+                            }
+                        />
+
+                        {/* Optional counter */}
+                        {counterEnabled && (
+                            <Text
+                                style={{
+                                    textAlign: 'right',
+                                    opacity: 0.6,
+                                    marginTop: 4,
+                                }}
+                            >
+                                {valueStr.length}
+                                {typeof maxLen === 'number'
+                                    ? ` / ${maxLen}`
+                                    : ''}
+                            </Text>
+                        )}
+
+                        <HelperText type="error" visible={!!fieldState.error}>
+                            {fieldState.error?.message ?? ''}
+                        </HelperText>
+                        {!fieldState.error && !!description ? (
+                            <HelperText type="info" visible>
+                                {description}
+                            </HelperText>
+                        ) : null}
+                    </View>
+                )
+            }}
+        />
+    )
+}

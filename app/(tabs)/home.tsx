@@ -142,6 +142,9 @@ const Home = () => {
             title: 'Ketentuan',
             badge: '30MINS',
             icon: noteIcon,
+            onPress: () => {
+                router.push('/note')
+            },
         },
         {
             id: 'more',
