@@ -12,6 +12,7 @@ export default {
         newArchEnabled: true,
         ios: {
             supportsTablet: true,
+            bundleIdentifier: 'com.byteik.cucibayargo',
         },
         android: {
             adaptiveIcon: {
@@ -38,6 +39,8 @@ export default {
                     backgroundColor: '#ffffff',
                 },
             ],
+            'expo-font',
+            'expo-web-browser',
         ],
         experiments: {
             typedRoutes: true,

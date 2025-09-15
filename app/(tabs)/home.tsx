@@ -13,7 +13,18 @@ import { Clock10, Shapes, Users } from 'lucide-react-native'
 import React, { useEffect, useState } from 'react'
 import { FlatList, Image, StyleSheet, View } from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
-import { Avatar, Card, Text, TouchableRipple } from 'react-native-paper'
+import {
+    Avatar,
+    Card,
+    Modal,
+    Portal,
+    Text,
+    TouchableRipple,
+} from 'react-native-paper'
+import DateTimePicker, {
+    DateType,
+    useDefaultStyles,
+} from 'react-native-ui-datepicker'
 
 type Service = {
     id: string
@@ -136,6 +147,9 @@ const Home = () => {
             title: 'Loporan',
             badge: 'FLAT5K',
             icon: reportIcon,
+            onPress: () => {
+                setIsReportFilterOpen(true)
+            },
         },
         {
             id: 'note',
@@ -152,6 +166,9 @@ const Home = () => {
             icon: moreIcon,
         },
     ]
+    const [isReportFilterOpen, setIsReportFilterOpen] = useState(false)
+    const [reportDate, setReportDate] = useState<DateType>()
+    const defaultStyles = useDefaultStyles('light')
 
     useEffect(() => {
         if (isFocused) {
@@ -218,6 +235,115 @@ const Home = () => {
                 // Make sure you don't pin content to the bottom:
                 contentContainerStyle={{ paddingBottom: 16 }}
                 // inverted={false} // (default) ensure not inverted
+            />
+
+            <Portal>
+                <Modal
+                    visible={isReportFilterOpen}
+                    onDismiss={() => setIsReportFilterOpen(false)}
+                    contentContainerStyle={{
+                        backgroundColor: 'white',
+                        padding: 20,
+                        marginHorizontal: 20,
+                        borderRadius: 20,
+                    }}
+                >
+                    <DateTimePicker
+                        mode="range"
+                        date={reportDate} // must be { startDate, endDate }
+                        onChange={({ startDate, endDate }) => {
+                            setReportDate({ startDate, endDate }) // keep it controlled
+                        }}
+                        styles={{
+                            ...defaultStyles,
+                            selected_start: {
+                                ...(defaultStyles.selected_start || {}),
+                                backgroundColor: '#37aae0',
+                                borderColor: '#37aae0',
+                            },
+                            selected_end: {
+                                ...(defaultStyles.selected_end || {}),
+                                backgroundColor: '#37aae0',
+                                borderColor: '#37aae0',
+                            },
+                            selected_between: {
+                                ...(defaultStyles.selected_between || {}),
+                                backgroundColor: '#37aae033', // subtle fill for in-between days
+                                borderColor: '#37aae0',
+                            },
+
+                            // labels
+                            selected_label: {
+                                ...(defaultStyles.selected_label || {}),
+                                color: '#fff',
+                                fontWeight: '700',
+                            },
+                            selected_between_label: {
+                                ...(defaultStyles.selected_between_label || {}),
+                                color: '#0f172a',
+                                fontWeight: '600',
+                            },
+
+                            today: {
+                                ...(defaultStyles.today || {}),
+                                borderColor: '#37aae0',
+                                borderWidth: 1,
+                            },
+                            headerText: {
+                                ...(defaultStyles.headerText || {}),
+                                color: '#000',
+                            },
+                        }}
+                    />
+                </Modal>
+            </Portal>
+
+            <DateTimePicker
+                mode="range"
+                date={reportDate} // must be { startDate, endDate }
+                onChange={({ startDate, endDate }) => {
+                    setReportDate({ startDate, endDate }) // keep it controlled
+                }}
+                styles={{
+                    ...defaultStyles,
+                    selected_start: {
+                        ...(defaultStyles.selected_start || {}),
+                        backgroundColor: '#37aae0',
+                        borderColor: '#37aae0',
+                    },
+                    selected_end: {
+                        ...(defaultStyles.selected_end || {}),
+                        backgroundColor: '#37aae0',
+                        borderColor: '#37aae0',
+                    },
+                    selected_between: {
+                        ...(defaultStyles.selected_between || {}),
+                        backgroundColor: '#37aae033', // subtle fill for in-between days
+                        borderColor: '#37aae0',
+                    },
+
+                    // labels
+                    selected_label: {
+                        ...(defaultStyles.selected_label || {}),
+                        color: '#fff',
+                        fontWeight: '700',
+                    },
+                    selected_between_label: {
+                        ...(defaultStyles.selected_between_label || {}),
+                        color: '#0f172a',
+                        fontWeight: '600',
+                    },
+
+                    today: {
+                        ...(defaultStyles.today || {}),
+                        borderColor: '#37aae0',
+                        borderWidth: 1,
+                    },
+                    headerText: {
+                        ...(defaultStyles.headerText || {}),
+                        color: '#000',
+                    },
+                }}
             />
 
             {/*<FlatList*/}
