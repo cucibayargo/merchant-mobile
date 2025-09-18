@@ -10,21 +10,43 @@ import useGetOrders from '@/hooks/order/useGetOrders'
 import { useIsFocused } from '@react-navigation/core'
 import { useRouter } from 'expo-router'
 import { Clock10, Shapes, Users } from 'lucide-react-native'
-import React, { useEffect, useState } from 'react'
-import { FlatList, Image, StyleSheet, View } from 'react-native'
+import React, { useCallback, useEffect, useState } from 'react'
+import {
+    FlatList,
+    Image,
+    Platform,
+    StyleSheet,
+    View,
+    Modal,
+    Linking,
+    Alert,
+} from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
 import {
     Avatar,
     Card,
-    Modal,
+    Divider,
+    // Modal,
     Portal,
     Text,
     TouchableRipple,
+    Button,
 } from 'react-native-paper'
+// import DateTimePicker, {
+//     DateType,
+//     useDefaultStyles,
+// } from 'react-native-ui-datepicker'
+import {
+    DatePickerModal,
+    id,
+    registerTranslation,
+} from 'react-native-paper-dates'
 import DateTimePicker, {
-    DateType,
-    useDefaultStyles,
-} from 'react-native-ui-datepicker'
+    DateTimePickerEvent,
+} from '@react-native-community/datetimepicker'
+import { getLocales } from 'expo-localization'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import Constants from 'expo-constants'
 
 type Service = {
     id: string
@@ -148,7 +170,9 @@ const Home = () => {
             badge: 'FLAT5K',
             icon: reportIcon,
             onPress: () => {
+                // open()
                 setIsReportFilterOpen(true)
+                console.log('report')
             },
         },
         {
@@ -167,8 +191,18 @@ const Home = () => {
         },
     ]
     const [isReportFilterOpen, setIsReportFilterOpen] = useState(false)
-    const [reportDate, setReportDate] = useState<DateType>()
-    const defaultStyles = useDefaultStyles('light')
+    const [reportDate, setReportDate] = useState({
+        start: undefined,
+        end: undefined,
+    })
+    registerTranslation('id', id)
+    const [showStart, setShowStart] = React.useState(false)
+    const [showEnd, setShowEnd] = React.useState(false)
+    const locale = getLocales()[0].languageTag ?? 'en-US'
+    const fmt = new Intl.DateTimeFormat(locale, {
+        dateStyle: 'medium',
+    })
+    const [show, setShow] = useState(false)
 
     useEffect(() => {
         if (isFocused) {
@@ -182,8 +216,68 @@ const Home = () => {
         }
     }, [data])
 
+    const open = useCallback(() => {
+        setIsReportFilterOpen(true)
+        console.log('open')
+    }, [])
+
+    const close = useCallback(() => {
+        console.log('close')
+        setShowStart(false)
+        setShowEnd(false)
+        setIsReportFilterOpen(false)
+    }, [])
+
+    const onChangeStart = (event: DateTimePickerEvent, date?: Date) => {
+        // Android fires 'dismissed' or 'set'. iOS fires 'set' continuously as you scroll.
+        const isSet = event.type === 'set' || Platform.OS === 'ios'
+        // Close the native dialog after interaction
+        if (Platform.OS === 'android') setShowStart(false)
+
+        if (isSet && date) {
+            setReportDate((prev) => {
+                // If end is before new start, bump end to start (keeps range valid)
+                const end = prev.end && prev.end < date ? date : prev.end
+                return { start: date, end }
+            })
+            // Nice UX: auto-open End after choosing Start on Android
+            if (Platform.OS === 'android') setShowEnd(true)
+        }
+    }
+
+    const onChangeEnd = (event: DateTimePickerEvent, date?: Date) => {
+        const isSet = event.type === 'set' || Platform.OS === 'ios'
+        if (Platform.OS === 'android') setShowEnd(false)
+
+        if (isSet && date) {
+            setReportDate((prev) => {
+                // If picked end is before start, snap it to start
+                const start = prev.start
+                const nextEnd = start && date < start ? start : date
+                return { start, end: nextEnd }
+            })
+        }
+    }
+
+    const clear = () => setReportDate({})
+
+    const downloadReport = async (): void => {
+        const url = `${Constants.expoConfig?.extra?.API_URL}/report/download?start_date=${
+            reportDate.start
+        }&end_date=${reportDate.end}`
+        const supported = await Linking.canOpenURL(url)
+
+        if (supported) {
+            // Opening the link with some app, if the URL scheme is "http" the web link should be opened
+            // by some browser in the mobile
+            await Linking.openURL(url)
+        } else {
+            Alert.alert(`Don't know how to open this URL: ${url}`)
+        }
+    }
+
     return (
-        <View style={styles.container}>
+        <SafeAreaView style={styles.container}>
             <Spinner visible={isLoading} />
 
             <View style={styles.topElement}>
@@ -237,137 +331,110 @@ const Home = () => {
                 // inverted={false} // (default) ensure not inverted
             />
 
-            <Portal>
-                <Modal
-                    visible={isReportFilterOpen}
-                    onDismiss={() => setIsReportFilterOpen(false)}
-                    contentContainerStyle={{
-                        backgroundColor: 'white',
-                        padding: 20,
-                        marginHorizontal: 20,
-                        borderRadius: 20,
+            <Modal
+                visible={isReportFilterOpen}
+                transparent
+                animationType="fade"
+            >
+                <View
+                    style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(0,0,0,0.5)',
+                        justifyContent: 'center',
                     }}
                 >
-                    <DateTimePicker
-                        mode="range"
-                        date={reportDate} // must be { startDate, endDate }
-                        onChange={({ startDate, endDate }) => {
-                            setReportDate({ startDate, endDate }) // keep it controlled
+                    <View
+                        style={{
+                            backgroundColor: '#fff',
+                            margin: 20,
+                            borderRadius: 16,
+                            padding: 16,
                         }}
-                        styles={{
-                            ...defaultStyles,
-                            selected_start: {
-                                ...(defaultStyles.selected_start || {}),
-                                backgroundColor: '#37aae0',
-                                borderColor: '#37aae0',
-                            },
-                            selected_end: {
-                                ...(defaultStyles.selected_end || {}),
-                                backgroundColor: '#37aae0',
-                                borderColor: '#37aae0',
-                            },
-                            selected_between: {
-                                ...(defaultStyles.selected_between || {}),
-                                backgroundColor: '#37aae033', // subtle fill for in-between days
-                                borderColor: '#37aae0',
-                            },
+                    >
+                        <Text variant="titleMedium" style={{ marginBottom: 8 }}>
+                            Pilih Tanggal
+                        </Text>
 
-                            // labels
-                            selected_label: {
-                                ...(defaultStyles.selected_label || {}),
-                                color: '#fff',
-                                fontWeight: '700',
-                            },
-                            selected_between_label: {
-                                ...(defaultStyles.selected_between_label || {}),
-                                color: '#0f172a',
-                                fontWeight: '600',
-                            },
-
-                            today: {
-                                ...(defaultStyles.today || {}),
-                                borderColor: '#37aae0',
-                                borderWidth: 1,
-                            },
-                            headerText: {
-                                ...(defaultStyles.headerText || {}),
-                                color: '#000',
-                            },
-                        }}
-                    />
-                </Modal>
-            </Portal>
-
-            <DateTimePicker
-                mode="range"
-                date={reportDate} // must be { startDate, endDate }
-                onChange={({ startDate, endDate }) => {
-                    setReportDate({ startDate, endDate }) // keep it controlled
-                }}
-                styles={{
-                    ...defaultStyles,
-                    selected_start: {
-                        ...(defaultStyles.selected_start || {}),
-                        backgroundColor: '#37aae0',
-                        borderColor: '#37aae0',
-                    },
-                    selected_end: {
-                        ...(defaultStyles.selected_end || {}),
-                        backgroundColor: '#37aae0',
-                        borderColor: '#37aae0',
-                    },
-                    selected_between: {
-                        ...(defaultStyles.selected_between || {}),
-                        backgroundColor: '#37aae033', // subtle fill for in-between days
-                        borderColor: '#37aae0',
-                    },
-
-                    // labels
-                    selected_label: {
-                        ...(defaultStyles.selected_label || {}),
-                        color: '#fff',
-                        fontWeight: '700',
-                    },
-                    selected_between_label: {
-                        ...(defaultStyles.selected_between_label || {}),
-                        color: '#0f172a',
-                        fontWeight: '600',
-                    },
-
-                    today: {
-                        ...(defaultStyles.today || {}),
-                        borderColor: '#37aae0',
-                        borderWidth: 1,
-                    },
-                    headerText: {
-                        ...(defaultStyles.headerText || {}),
-                        color: '#000',
-                    },
-                }}
-            />
-
-            {/*<FlatList*/}
-            {/*    data={SERVICES}*/}
-            {/*    keyExtractor={(i) => i.id}*/}
-            {/*    numColumns={3}*/}
-            {/*    columnWrapperStyle={styles.row}*/}
-            {/*    contentContainerStyle={styles.listPad}*/}
-            {/*    renderItem={({ item }) => <ServiceTile item={item} />}*/}
-            {/*/>*/}
-
-            {/*{orders.map((order: IOngoingOrder) => (*/}
-            {/*    <OrderCard*/}
-            {/*        idx={Number(order.id)}*/}
-            {/*        key={order.id}*/}
-            {/*        type="Diproses"*/}
-            {/*        data={order}*/}
-            {/*        // openConfirmationDialog={() => {*/}
-            {/*        //     setConfirmationDialogCounter(confirmationDialogCounter + 1)*/}
-            {/*        //     setSelectedInvoiceForUpdate(item.invoice)*/}
-            {/*        // }}*/}
-            {/*    />*/}
-            {/*))}*/}
-        </View>
+                        <View style={{ gap: 8, marginBottom: 8 }}>
+                            <Text>Tanggal Mulai</Text>
+                            <Button
+                                mode="outlined"
+                                onPress={() => setShowStart(true)}
+                            >
+                                {reportDate.start
+                                    ? fmt.format(reportDate.start)
+                                    : 'Pilih Tanggal Mulai'}
+                            </Button>
+                            {showStart && (
+                                <DateTimePicker
+                                    value={reportDate.start ?? new Date()}
+                                    mode="date"
+                                    display={
+                                        Platform.OS === 'ios'
+                                            ? 'inline'
+                                            : 'default'
+                                    }
+                                    // If you already chose an end, don't allow start after end
+                                    maximumDate={reportDate.end}
+                                    onChange={onChangeStart}
+                                />
+                            )}
+                        </View>
+                        <Divider />
+                        {/* End field */}
+                        <View style={{ gap: 8, marginTop: 8 }}>
+                            <Text>Tanggal Selesai</Text>
+                            <Button
+                                mode="outlined"
+                                onPress={() => setShowEnd(true)}
+                                disabled={!reportDate.start} // usually you want start first
+                            >
+                                {reportDate.end
+                                    ? fmt.format(reportDate.end)
+                                    : 'Pilih Tanggal Selesai'}
+                            </Button>
+                            {showEnd && (
+                                <DateTimePicker
+                                    value={
+                                        reportDate.end ??
+                                        reportDate.start ??
+                                        new Date()
+                                    }
+                                    mode="date"
+                                    display={
+                                        Platform.OS === 'ios'
+                                            ? 'inline'
+                                            : 'default'
+                                    }
+                                    // Can't pick before start
+                                    minimumDate={reportDate.start}
+                                    onChange={onChangeEnd}
+                                />
+                            )}
+                        </View>
+                        <View
+                            style={{
+                                flexDirection: 'row',
+                                gap: 12,
+                                marginTop: 16,
+                            }}
+                        >
+                            <Button onPress={close}>Batal</Button>
+                            <Button
+                                mode="contained"
+                                onPress={() => {
+                                    close()
+                                    downloadReport()
+                                }}
+                                disabled={!reportDate.start || !reportDate.end}
+                            >
+                                Download Laporan
+                            </Button>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
+        </SafeAreaView>
     )
 }
 
@@ -377,7 +444,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
-        paddingTop: 40,
+        // paddingTop: 40,
         paddingHorizontal: 20,
     },
     topElement: {

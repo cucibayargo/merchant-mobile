@@ -5,7 +5,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { UserProvider } from '@/context/user'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { DefaultTheme, PaperProvider } from 'react-native-paper'
+import { DefaultTheme, PaperProvider, Portal } from 'react-native-paper'
 
 export default function RootLayout() {
     // const jwtTokenErrors: string[] = [
