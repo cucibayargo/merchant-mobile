@@ -28,7 +28,16 @@ export const addCustomer = async (customer: CustomerPayload) => {
 
   await db.runAsync(
     `INSERT INTO customer (id, merchant_id, name, address, phone_number, email, gender, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-    [id, customer.merchant_id, customer.name, customer.address, customer.phone_number, customer.email, customer.gender, created_at]
+    [
+      id,
+      customer.merchant_id,
+      customer.name,
+      customer.address ?? null,
+      customer.phone_number ?? null,
+      customer.email ?? null,
+      customer.gender,
+      created_at
+    ]
   );
 
   return { ...customer, created_at, id };
