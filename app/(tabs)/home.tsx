@@ -47,6 +47,7 @@ import DateTimePicker, {
 import { getLocales } from 'expo-localization'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Constants from 'expo-constants'
+import { BottomDrawer } from '@/components/bottomDrawer'
 
 type Service = {
     id: string
@@ -112,6 +113,10 @@ const ServiceTile = ({ item }: { item: Service }) => {
             </Card>
         </TouchableRipple>
     )
+}
+
+function PortalizePortal(props: { children: ReactNode }) {
+    return null
 }
 
 const Home = () => {
@@ -188,6 +193,9 @@ const Home = () => {
             id: 'more',
             title: 'Lainnya',
             icon: moreIcon,
+            onPress: () => {
+                setShowMoreMenu(true)
+            },
         },
     ]
     const [isReportFilterOpen, setIsReportFilterOpen] = useState(false)
@@ -202,7 +210,7 @@ const Home = () => {
     const fmt = new Intl.DateTimeFormat(locale, {
         dateStyle: 'medium',
     })
-    const [show, setShow] = useState(false)
+    const [showMoreMenu, setShowMoreMenu] = useState(false)
 
     useEffect(() => {
         if (isFocused) {
@@ -434,6 +442,13 @@ const Home = () => {
                     </View>
                 </View>
             </Modal>
+
+            <BottomDrawer
+                open={showMoreMenu}
+                onClose={() => setShowMoreMenu(false)}
+            >
+                <Text>Test</Text>
+            </BottomDrawer>
         </SafeAreaView>
     )
 }
