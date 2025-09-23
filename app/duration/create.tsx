@@ -31,10 +31,10 @@ export default function CreateDuration() {
     }
 
     return (
-        <SafeAreaView className="flex-1 bg-white">
+        <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
             <Spinner visible={isPendingCreate} />
 
-            <View className="p-4">
+            <View style={{ padding: 16 }}>
                 <FormField.PaperInput<CustomForm, 'name'>
                     control={control}
                     name="name"

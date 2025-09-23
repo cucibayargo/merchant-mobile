@@ -138,11 +138,8 @@ export default function DurationIndex() {
     )
 
     return (
-        <SafeAreaView
-            className="flex-1 bg-white"
-            style={{ backgroundColor: '#f0eeeb' }}
-        >
-            <View className="px-4 pt-4">
+        <SafeAreaView style={{ backgroundColor: '#f0eeeb', flex: 1 }}>
+            <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
                 <CustomSearchBar
                     placeholder="Cari layanan..."
                     query={filter}
@@ -150,16 +147,18 @@ export default function DurationIndex() {
                 />
 
                 {(isLoading || (isRefetching && page === 1)) && (
-                    <View className="mt-6">
+                    <View style={{ paddingTop: 24 }}>
                         <ActivityIndicator />
                     </View>
                 )}
 
                 {!isLoading && services.length === 0 ? (
-                    <Text className="text-center mt-6">Tidak Ada Durasi</Text>
+                    <Text style={{ textAlign: 'center', marginTop: 24 }}>
+                        Tidak Ada Durasi
+                    </Text>
                 ) : (
                     <FlatList
-                        className="mt-4"
+                        style={{ marginTop: 16 }}
                         data={services}
                         keyExtractor={(item) => item.id}
                         renderItem={renderItem}
@@ -167,7 +166,7 @@ export default function DurationIndex() {
                         onEndReached={loadMore}
                         ListFooterComponent={
                             loadingMore && !isLastPage ? (
-                                <View className="py-4">
+                                <View style={{ paddingHorizontal: 16 }}>
                                     <ActivityIndicator />
                                 </View>
                             ) : null
@@ -176,12 +175,27 @@ export default function DurationIndex() {
                 )}
             </View>
 
-            <View className="absolute bottom-10 right-6">
+            <View style={{ position: 'absolute', bottom: 60, right: 24 }}>
                 <TouchableOpacity
-                    className="bg-blue-600 rounded-full w-12 h-12 items-center justify-center"
+                    style={{
+                        backgroundColor: '#2563eb',
+                        borderRadius: 999,
+                        width: 60,
+                        height: 60,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
                     onPress={navigateToCreate}
                 >
-                    <Text className="text-white text-2xl">＋</Text>
+                    <Text
+                        style={{
+                            color: 'white',
+                            fontSize: 30,
+                            marginTop: -7,
+                        }}
+                    >
+                        ＋
+                    </Text>
                 </TouchableOpacity>
             </View>
         </SafeAreaView>

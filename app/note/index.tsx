@@ -33,14 +33,14 @@ const NoteIndex = () => {
     }
 
     return (
-        <SafeAreaView
-            className="flex-1 bg-white"
-            style={{ backgroundColor: '#f0eeeb' }}
-        >
+        <SafeAreaView style={{ backgroundColor: '#f0eeeb', flex: 1 }}>
             <Spinner visible={isLoading || isPending} />
 
-            <View className="px-4 pt-4">
-                <FormField.PaperTextArea<CustomForm, 'duration'>
+            <View
+                className="px-4 pt-4"
+                style={{ paddingHorizontal: 16, paddingTop: 16 }}
+            >
+                <FormField.PaperTextArea<CustomForm, 'notes'>
                     control={control}
                     name="notes"
                     label="Durasi"
