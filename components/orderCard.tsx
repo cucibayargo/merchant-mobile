@@ -44,14 +44,25 @@ const OrderCard = ({
 
     return (
         <Pressable
-            className={`border rounded-md bg-white shadow-md mb-2 ${
-                isPaid ? 'border-watermelon-2' : 'border-watermelon-4'
-            }`}
+            style={{
+                borderWidth: 1,
+                backgroundColor: 'white',
+                marginBottom: 8,
+                borderColor: isPaid ? '#75b855' : '#db6161',
+                borderRadius: 10,
+            }}
             onPress={handleCardPress}
             accessibilityLabel={`order-${idx + 1}`}
         >
-            <View className="flex-row justify-between p-3 items-center">
-                <Text className="font-bold">{data.invoice}</Text>
+            <View
+                style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    padding: 12,
+                    alignItems: 'center',
+                }}
+            >
+                <Text style={{ fontWeight: 700 }}>{data.invoice}</Text>
                 {type !== 'Selesai' ? (
                     <Pressable
                         onPress={handleChecklistPress}
@@ -59,7 +70,13 @@ const OrderCard = ({
                         accessibilityLabel="checklist-btn"
                     ></Pressable>
                 ) : (
-                    <Text className="text-sm font-thin mt-auto">
+                    <Text
+                        style={{
+                            fontSize: 14,
+                            fontWeight: 200,
+                            marginTop: 'auto',
+                        }}
+                    >
                         {format(
                             new Date(data.completed_at),
                             'dd MMM yyyy HH:mm',
@@ -71,20 +88,37 @@ const OrderCard = ({
                 )}
             </View>
 
-            <View className="bg-gray-2 px-4 py-2 flex-row justify-between rounded-b-sm">
+            <View
+                style={{
+                    paddingHorizontal: 16,
+                    paddingVertical: 8,
+                    justifyContent: 'space-between',
+                    borderBottomStartRadius: 10,
+                }}
+            >
                 <View>
-                    <Text className="text-sm font-thin">{data.customer}</Text>
+                    <Text style={{ fontSize: 14, fontWeight: 200 }}>
+                        {data.customer}
+                    </Text>
                     <Text
-                        className={`text-sm ${
-                            isPaid ? 'text-watermelon-2' : 'text-watermelon-4'
-                        }`}
+                        style={{
+                            fontSize: 14,
+                            color: isPaid ? '#75b855' : '#db6161',
+                        }}
                     >
                         {data.payment_status}
                     </Text>
                 </View>
 
                 {type === 'Diproses' && (
-                    <Text className="text-sm font-thin mt-auto">
+                    <Text
+                        className="text-sm font-thin mt-auto"
+                        style={{
+                            fontSize: 14,
+                            fontWeight: 200,
+                            marginTop: 'auto',
+                        }}
+                    >
                         {format(
                             new Date(data.estimated_date),
                             'dd MMM yyyy dd:mm',
@@ -96,7 +130,13 @@ const OrderCard = ({
                 )}
 
                 {type === 'Siap Diambil' && (
-                    <Text className="text-sm font-thin mt-auto">
+                    <Text
+                        style={{
+                            fontSize: 14,
+                            fontWeight: 100,
+                            marginTop: 'auto',
+                        }}
+                    >
                         {format(
                             new Date(data.ready_to_pick_up_at),
                             'dd MMM yyyy',

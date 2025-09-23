@@ -10,7 +10,7 @@ interface IPayload {
     phone_number: string
     name: string
     subscription_plan: string
-    phone_number_input: number
+    phone_number_input?: number
 }
 
 const useSignup = () => {
@@ -20,7 +20,10 @@ const useSignup = () => {
     return useMutation({
         mutationKey: ['signup'],
         mutationFn: async (paylod: IPayload) => {
-            paylod.phone_number = `0${paylod.phone_number.toString()}`
+            paylod.phone_number = paylod.phone_number_input
+                ? `0${paylod.phone_number_input.toString()}`
+                : ''
+            delete paylod.phone_number_input
             return await axiosInstance.post(url, paylod)
         },
 
