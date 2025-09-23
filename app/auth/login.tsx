@@ -67,7 +67,15 @@ const Login = () => {
 
     return (
         <SafeAreaProvider>
-            <SafeAreaView className="flex justify-center px-4 bg-white h-screen">
+            <SafeAreaView
+                style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    paddingHorizontal: 16,
+                    backgroundColor: 'white',
+                    height: '100%',
+                }}
+            >
                 <Spinner visible={isPending} />
 
                 <Image
@@ -97,11 +105,30 @@ const Login = () => {
                     onPress={form.handleSubmit(onSubmit)}
                 />
 
-                <View className={'flex flex-row justify-center mt-5 gap-1'}>
-                    <Text className={'text-sm'}>Belum punya akun? </Text>
+                <View
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        marginTop: 20,
+                        gap: 4,
+                    }}
+                >
+                    <Text
+                        style={{
+                            fontSize: 14,
+                            lineHeight: 20,
+                            textAlign: 'center',
+                        }}
+                    >
+                        Belum punya akun?
+                    </Text>
                     <TouchableOpacity>
                         <Text
-                            className={'text-sm'}
+                            style={{
+                                fontSize: 14,
+                                lineHeight: 20,
+                                textAlign: 'center',
+                            }}
                             onPress={() =>
                                 router.push(
                                     '/auth/signup?subscription_plan=gratis'

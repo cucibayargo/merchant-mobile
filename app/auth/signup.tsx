@@ -7,6 +7,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import useSignup from '@/hooks/auth/useSignup'
 import Spinner from 'react-native-loading-spinner-overlay'
+import { FormField } from '@/components/formInput'
 
 const Signup = () => {
     const formSchema = z
@@ -29,8 +30,8 @@ const Signup = () => {
             repeat_password: z
                 .string()
                 .min(1, { message: 'Ulang Password wajib diisi' }),
-            phone_number: z
-                .string()
+            phone_number_input: z
+                .number()
                 .min(1, { message: 'Nomor HP wajib diisi' }),
         })
         .refine((data) => data.password === data.repeat_password, {
@@ -45,7 +46,7 @@ const Signup = () => {
             email: '',
             password: '',
             repeat_password: '',
-            phone_number: '',
+            phone_number_input: 0,
         },
         mode: 'onBlur',
     })
@@ -58,9 +59,10 @@ const Signup = () => {
         const payload = {
             name: values.name,
             email: values.email,
-            phone_number: values.phone_number,
+            phone_number_input: values.phone_number_input,
             password: values.password,
             subscription_plan: localSearchParams['subscription_plan']!,
+            phone_number: '',
         }
 
         console.log('localSearchParams', localSearchParams['subscription_plan'])
@@ -97,139 +99,44 @@ const Signup = () => {
             <Text className={'text-2xl font-bold mb-5'}>Daftar Akun</Text>
 
             <View>
-                <View className="mb-3">
-                    <Controller
-                        control={form.control}
-                        name="name"
-                        render={({ field }) => (
-                            <View>
-                                <Text>Nama</Text>
-                                <TextInput
-                                    className="border rounded mt-2"
-                                    onChangeText={(value) =>
-                                        field.onChange(value)
-                                    }
-                                />
+                <FormField.PaperInput<CustomForm, 'name'>
+                    control={form.control}
+                    name="name"
+                    label="Nama"
+                    autoCapitalize="none"
+                />
 
-                                {form.formState.errors.name && (
-                                    <Text className="text-red-500 text-xs">
-                                        {form.formState.errors.name.message}
-                                    </Text>
-                                )}
-                            </View>
-                        )}
-                    ></Controller>
-                </View>
+                <FormField.PaperInput<CustomForm, 'email'>
+                    control={form.control}
+                    name="email"
+                    label="Email"
+                    autoCapitalize="none"
+                />
 
-                <View className="mb-3">
-                    <Controller
-                        control={form.control}
-                        name="email"
-                        render={({ field }) => (
-                            <View>
-                                <Text>Email</Text>
-                                <TextInput
-                                    className="border rounded mt-2"
-                                    onChangeText={(value) =>
-                                        field.onChange(value)
-                                    }
-                                />
+                <FormField.PaperPassword<CustomForm, 'password'>
+                    control={form.control}
+                    name="password"
+                    label="Password"
+                    autoCapitalize="none"
+                    description={
+                        'Format Password: Huruf kapital, Huruf kecil, Angka, Minimal\n' +
+                        '8 karakter, Maksimal 20 karakter'
+                    }
+                />
 
-                                {form.formState.errors.email && (
-                                    <Text className="text-red-500 text-xs">
-                                        {form.formState.errors.email.message}
-                                    </Text>
-                                )}
-                            </View>
-                        )}
-                    ></Controller>
-                </View>
+                <FormField.PaperPassword<CustomForm, 'repeat_password'>
+                    control={form.control}
+                    name="repeat_password"
+                    label="Ulang Password"
+                    autoCapitalize="none"
+                />
 
-                <View className="mb-3">
-                    <Controller
-                        control={form.control}
-                        name="password"
-                        render={({ field }) => (
-                            <View>
-                                <Text>Password</Text>
-                                <TextInput
-                                    className="border rounded mt-2"
-                                    secureTextEntry={true}
-                                    onChangeText={(value) =>
-                                        field.onChange(value)
-                                    }
-                                />
-
-                                {form.formState.errors.password && (
-                                    <Text className="text-red-500 text-xs">
-                                        {form.formState.errors.password.message}
-                                    </Text>
-                                )}
-                            </View>
-                        )}
-                    ></Controller>
-                    <Text className="text-xs text-gray-500">
-                        Format Password: Huruf kapital, Huruf kecil, Angka,
-                        Minimal 8 karakter, Maksimal 20 karakter
-                    </Text>
-                </View>
-
-                <View className="mb-3">
-                    <Controller
-                        control={form.control}
-                        name="repeat_password"
-                        render={({ field }) => (
-                            <View>
-                                <Text>Ulang Password</Text>
-                                <TextInput
-                                    className="border rounded mt-2"
-                                    secureTextEntry={true}
-                                    onChangeText={(value) =>
-                                        field.onChange(value)
-                                    }
-                                />
-
-                                {form.formState.errors['repeat_password'] && (
-                                    <Text className="text-red-500 text-xs">
-                                        {
-                                            form.formState.errors[
-                                                'repeat_password'
-                                            ].message
-                                        }
-                                    </Text>
-                                )}
-                            </View>
-                        )}
-                    ></Controller>
-                </View>
-
-                <View className="mb-3">
-                    <Controller
-                        control={form.control}
-                        name="phone_number"
-                        render={({ field }) => (
-                            <View>
-                                <Text>No HP</Text>
-                                <TextInput
-                                    className="border rounded mt-2"
-                                    onChangeText={(value) =>
-                                        field.onChange(value)
-                                    }
-                                />
-
-                                {form.formState.errors['phone_number'] && (
-                                    <Text className="text-red-500 text-xs">
-                                        {
-                                            form.formState.errors[
-                                                'phone_number'
-                                            ].message
-                                        }
-                                    </Text>
-                                )}
-                            </View>
-                        )}
-                    ></Controller>
-                </View>
+                <FormField.PaperNumber<CustomForm, 'phone_number_input'>
+                    control={form.control}
+                    name="phone_number_input"
+                    label="No HP"
+                    autoCapitalize="none"
+                />
 
                 <Button
                     title={'Daftar'}

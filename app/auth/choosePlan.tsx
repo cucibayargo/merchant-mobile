@@ -16,17 +16,32 @@ const PlanCard = ({
 }) => {
     return (
         <TouchableOpacity
-            className={'shadow-lg rounded-lg p-5 mb-5 bg-white'}
+            style={{
+                borderRadius: 8,
+                padding: 20,
+                marginBottom: 20,
+                backgroundColor: 'white',
+            }}
             onPress={() => onPress(data)}
             key={key}
         >
-            <View className={'flex flex-row justify-between'}>
-                <Text className={'font-bold text-lg'}>{data.title}</Text>
+            <View
+                style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                }}
+            >
+                <Text style={{ fontWeight: 700, fontSize: 18 }}>
+                    {data.title}
+                </Text>
                 <Text>Rp. {data.price}</Text>
             </View>
 
             {data.features.map((feature, index) => (
-                <View key={index} className={'flex flex-row gap-2 mt-3'}>
+                <View
+                    key={index}
+                    style={{ flexDirection: 'row', gap: 8, marginTop: 12 }}
+                >
                     <Image source={images.checkIcon} alt="check" />
                     <Text>{feature}</Text>
                 </View>
@@ -121,7 +136,12 @@ const ChoosePlan = () => {
         <ScrollView>
             <Spinner visible={isPending} />
 
-            <View className={'py-16 px-5'}>
+            <View style={{ paddingVertical: 64, paddingHorizontal: 20 }}>
+                <Text
+                    style={{ fontSize: 24, fontWeight: 700, marginBottom: 20 }}
+                >
+                    Pilih Paket
+                </Text>
                 {pricingPlan.map((plan, index) => (
                     <PlanCard
                         data={plan}

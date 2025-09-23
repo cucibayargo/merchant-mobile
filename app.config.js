@@ -41,6 +41,7 @@ export default {
             ],
             'expo-font',
             'expo-web-browser',
+            'expo-localization',
         ],
         experiments: {
             typedRoutes: true,

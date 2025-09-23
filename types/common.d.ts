@@ -35,3 +35,6 @@ interface IDropdown {
     value: string
     label: string
 }
+
+// Form
+type CustomForm = z.infer<typeof schema>
