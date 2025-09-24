@@ -1,5 +1,5 @@
 import { UserProvider } from '@/context/user'
-import { initDB } from '@/database'
+import { addCustomer, deleteCustomer, filterCustomers, getCustomerById, getCustomers, initDB, updateCustomer } from '@/database'
 import { QueryClient } from '@tanstack/query-core'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Stack } from 'expo-router'
@@ -41,11 +41,56 @@ export default function RootLayout() {
     }
   
     useEffect(() => {
-      initDB()
-        .then(() => console.log("✅ DB initialized"))
-        .catch((err) => console.error("DB init error", err));
-    }, []);
+      const runCRUD = async () => {
+        try {
+          await initDB();
+          console.log("✅ DB initialized");
 
+          // 1. CREATE
+          const newCustomer = await addCustomer({
+            merchant_id: "m1",
+            name: "John Doe",
+            gender: "Laki-laki",
+            address: "Jakarta",
+            phone_number: "08123456789",
+            email: "john@example.com",
+          });
+          console.log("🟢 Added:", newCustomer);
+
+          const results = await filterCustomers("John Doe");
+          console.log("Filtered customers:", results);
+
+
+          // 2. READ ALL
+          const customers = await getCustomers();
+          console.log("📖 All customers:", customers);
+
+          // 3. READ ONE
+          const singleCustomer = await getCustomerById(newCustomer.id);
+          console.log("📖 Single customer:", singleCustomer);
+
+          // 4. UPDATE
+          const updated = await updateCustomer(newCustomer.id, {
+            name: "John Updated",
+            address: "Bandung",
+          });
+          console.log("✏️ Updated:", updated);
+
+          // 5. DELETE
+          await deleteCustomer(newCustomer.id);
+          console.log("🗑️ Deleted:", newCustomer.id);
+
+          // Confirm delete
+          const afterDelete = await getCustomers();
+          console.log("📖 Customers after delete:", afterDelete);
+        } catch (err) {
+          console.error("❌ CRUD error:", err);
+        }
+      };
+
+      runCRUD();
+    }, []);
+  
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <SafeAreaProvider>
