@@ -1,11 +1,13 @@
-import { Stack } from 'expo-router'
-import './globals.css'
+import { UserProvider } from '@/context/user'
+import { initDB } from '@/database'
 import { QueryClient } from '@tanstack/query-core'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { UserProvider } from '@/context/user'
+import { Stack } from 'expo-router'
+import { useEffect } from 'react'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
+import { DefaultTheme, PaperProvider } from 'react-native-paper'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import { DefaultTheme, PaperProvider, Portal } from 'react-native-paper'
+import './globals.css'
 
 export default function RootLayout() {
     // const jwtTokenErrors: string[] = [
@@ -37,6 +39,12 @@ export default function RootLayout() {
             placeholder: '#999999',
         },
     }
+  
+    useEffect(() => {
+      initDB()
+        .then(() => console.log("✅ DB initialized"))
+        .catch((err) => console.error("DB init error", err));
+    }, []);
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
