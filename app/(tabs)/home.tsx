@@ -48,6 +48,7 @@ import { getLocales } from 'expo-localization'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Constants from 'expo-constants'
 import { BottomDrawer } from '@/components/bottomDrawer'
+import { AboutApp } from '@/components/aboutApp'
 
 type Service = {
     id: string
@@ -230,8 +231,9 @@ const Home = () => {
             badge: '30MINS',
             icon: noteIcon,
             isPrimary: false,
-            onPress: async () => {
-                await Linking.openURL('')
+            onPress: () => {
+                setShowMoreMenu(false)
+                setIsAboutAppOpen(true)
             },
         },
     ]
@@ -248,6 +250,7 @@ const Home = () => {
         dateStyle: 'medium',
     })
     const [showMoreMenu, setShowMoreMenu] = useState(false)
+    const [isAboutAppOpen, setIsAboutAppOpen] = useState(false)
 
     useEffect(() => {
         if (isFocused) {
@@ -260,11 +263,6 @@ const Home = () => {
             setOrders(data?.data?.transactions)
         }
     }, [data])
-
-    const open = useCallback(() => {
-        setIsReportFilterOpen(true)
-        console.log('open')
-    }, [])
 
     const close = useCallback(() => {
         console.log('close')
@@ -495,6 +493,11 @@ const Home = () => {
                     />
                 </View>
             </BottomDrawer>
+
+            <AboutApp
+                visible={isAboutAppOpen}
+                visibleChange={setIsAboutAppOpen}
+            />
         </SafeAreaView>
     )
 }
