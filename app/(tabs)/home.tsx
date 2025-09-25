@@ -173,6 +173,9 @@ const Home = () => {
             badge: '-75%',
             icon: customerIcon,
             isPrimary: true,
+            onPress: () => {
+                router.push('/customer ')
+            },
         },
         {
             id: 'report',
