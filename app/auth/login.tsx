@@ -37,7 +37,7 @@ const Login = () => {
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-            email: 'Yoo2@rama.com',
+            email: 'Yoo3@rama.com',
             password: 'Pass1234',
         },
         mode: 'onBlur',
@@ -131,7 +131,7 @@ const Login = () => {
                             }}
                             onPress={() =>
                                 router.push(
-                                    '/auth/signup?subscription_plan=gratis'
+                                    '/auth/signup?subscription_plan=gratis',
                                 )
                             }
                         >
