@@ -16,4 +16,15 @@ export const initDB = async () => {
       created_at TEXT DEFAULT (datetime('now'))
     );
   `);
+
+  await db.execAsync(`
+    CREATE TABLE IF NOT EXISTS duration (
+      id TEXT PRIMARY KEY NOT NULL,
+      duration REAL,
+      merchant_id TEXT,
+      name TEXT,
+      type TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+  `);
 };

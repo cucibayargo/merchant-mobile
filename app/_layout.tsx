@@ -1,5 +1,6 @@
 import { UserProvider } from '@/context/user'
 import { addCustomer, deleteCustomer, filterCustomers, getCustomerById, getCustomers, initDB, updateCustomer } from '@/database'
+import { addDuration, deleteDuration, filterDurations, getDurationById, getDurations, updateDuration } from '@/database/models/duration'
 import { QueryClient } from '@tanstack/query-core'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Stack } from 'expo-router'
@@ -39,11 +40,14 @@ export default function RootLayout() {
             placeholder: '#999999',
         },
     }
-  
-    useEffect(() => {
-      const runCRUD = async () => {
+    
+  useEffect(() => {
+      const init = async () => {
+        await initDB();
+      };
+
+      const runCustomerCRUD = async () => {
         try {
-          await initDB();
           console.log("✅ DB initialized");
 
           // 1. CREATE
@@ -88,9 +92,53 @@ export default function RootLayout() {
         }
       };
 
-      runCRUD();
+      const runDurationCRUD = async () => {
+        try {
+          console.log("✅ DB initialized");
+
+          // 1. CREATE
+          const newDuration = await addDuration({
+            merchant_id: "m1",
+            duration: 60,
+            name: "1 Hour",
+            type: "Service",
+          });
+          console.log("🟢 Added:", newDuration);
+
+          // Filter
+          const filtered = await filterDurations("Hour");
+          console.log("🔍 Filtered durations:", filtered);
+
+          // 2. READ ALL
+          const durations = await getDurations();
+          console.log("📖 All durations:", durations);
+
+          // 3. READ ONE
+          const singleDuration = await getDurationById(newDuration.id);
+          console.log("📖 Single duration:", singleDuration);
+
+          // 4. UPDATE
+          const updated = await updateDuration(newDuration.id, {
+            name: "2 Hours",
+            duration: 120,
+          });
+          console.log("✏️ Updated:", updated);
+
+          // 5. DELETE
+          await deleteDuration(newDuration.id);
+          console.log("🗑️ Deleted:", newDuration.id);
+
+          // Confirm delete
+          const afterDelete = await getDurations();
+          console.log("📖 Durations after delete:", afterDelete);
+        } catch (err) {
+          console.error("❌ CRUD error:", err);
+        }
+      };
+      init();
+      // runDurationCRUD();  
+      // runCustomerCRUD();
     }, []);
-  
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
             <SafeAreaProvider>
