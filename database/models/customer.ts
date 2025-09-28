@@ -21,6 +21,13 @@ export type CustomerPayload = {
   gender: string;
 };
 
+type PaginationResult<T> = {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
 export const addCustomer = async (customer: CustomerPayload) => {
   const db = getDB();
   const id = randomUUID();
@@ -44,15 +51,30 @@ export const addCustomer = async (customer: CustomerPayload) => {
   return { ...customer, created_at, id };
 };
 
-// Get all customers
-export const getCustomers = async (): Promise<Customer[]> => {
+export const getCustomers = async (
+  page = 1,
+  pageSize = 10
+): Promise<PaginationResult<Customer>> => {
   const db = getDB();
-  return await db.getAllAsync<Customer>(
-    "SELECT * FROM customer ORDER BY created_at DESC"
+  const offset = (page - 1) * pageSize;
+
+  const data = await db.getAllAsync<Customer>(
+    "SELECT * FROM customer ORDER BY created_at DESC LIMIT ? OFFSET ?",
+    [pageSize, offset]
   );
+
+  const totalRow = await db.getFirstAsync<{ count: number }>(
+    "SELECT COUNT(*) as count FROM customer"
+  );
+
+  return {
+    data,
+    total: totalRow?.count ?? 0,
+    page,
+    pageSize,
+  };
 };
 
-// Get a single customer by ID
 export const getCustomerById = async (id: string): Promise<Customer | null> => {
   const db = getDB();
   return await db.getFirstAsync<Customer>(
@@ -61,48 +83,64 @@ export const getCustomerById = async (id: string): Promise<Customer | null> => {
   );
 };
 
-// Update customer
 export const updateCustomer = async (
   id: string,
   updates: Partial<CustomerPayload>
 ): Promise<Customer | null> => {
   const db = getDB();
-
-  // Build dynamic SQL query for fields to update
   const fields = Object.keys(updates)
     .map((key) => `${key} = ?`)
     .join(", ");
   const values = Object.values(updates);
-
   if (fields.length === 0) return getCustomerById(id);
-
   await db.runAsync(
     `UPDATE customer SET ${fields} WHERE id = ?`,
     [...values, id]
   );
-
   return await getCustomerById(id);
 };
 
-// Delete customer
 export const deleteCustomer = async (id: string): Promise<void> => {
   const db = getDB();
   await db.runAsync("DELETE FROM customer WHERE id = ?", [id]);
 };
 
-// Filter customers by name, phone number, or email
-export const filterCustomers = async (keyword: string): Promise<Customer[]> => {
+export const filterCustomers = async (
+  keyword: string,
+  page = 1,
+  pageSize = 10
+): Promise<PaginationResult<Customer>> => {
   const db = getDB();
-
-  const query = `
-    SELECT * FROM customer
-    WHERE name LIKE ? 
-       OR phone_number LIKE ? 
-       OR email LIKE ?
-    ORDER BY created_at DESC
-  `;
-
   const param = `%${keyword}%`;
+  const offset = (page - 1) * pageSize;
 
-  return await db.getAllAsync<Customer>(query, [param, param, param]);
+  const data = await db.getAllAsync<Customer>(
+    `
+      SELECT * FROM customer
+      WHERE name LIKE ? 
+         OR phone_number LIKE ? 
+         OR email LIKE ?
+      ORDER BY created_at DESC
+      LIMIT ? OFFSET ?
+    `,
+    [param, param, param, pageSize, offset]
+  );
+
+  const totalRow = await db.getFirstAsync<{ count: number }>(
+    `
+      SELECT COUNT(*) as count
+      FROM customer
+      WHERE name LIKE ? 
+         OR phone_number LIKE ? 
+         OR email LIKE ?
+    `,
+    [param, param, param]
+  );
+
+  return {
+    data,
+    total: totalRow?.count ?? 0,
+    page,
+    pageSize,
+  };
 };

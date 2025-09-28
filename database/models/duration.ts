@@ -17,6 +17,13 @@ export type DurationPayload = {
   type?: string | null;
 };
 
+type PaginationResult<T> = {
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+};
+
 // Add duration
 export const addDuration = async (payload: DurationPayload) => {
   const db = getDB();
@@ -39,12 +46,29 @@ export const addDuration = async (payload: DurationPayload) => {
   return { ...payload, id, created_at };
 };
 
-// Get all durations
-export const getDurations = async (): Promise<Duration[]> => {
+// Get all durations with pagination
+export const getDurations = async (
+  page = 1,
+  pageSize = 10
+): Promise<PaginationResult<Duration>> => {
   const db = getDB();
-  return await db.getAllAsync<Duration>(
-    "SELECT * FROM duration ORDER BY created_at DESC"
+  const offset = (page - 1) * pageSize;
+
+  const data = await db.getAllAsync<Duration>(
+    "SELECT * FROM duration ORDER BY created_at DESC LIMIT ? OFFSET ?",
+    [pageSize, offset]
   );
+
+  const totalRow = await db.getFirstAsync<{ count: number }>(
+    "SELECT COUNT(*) as count FROM duration"
+  );
+
+  return {
+    data,
+    total: totalRow?.count ?? 0,
+    page,
+    pageSize,
+  };
 };
 
 // Get single duration by ID
@@ -84,17 +108,41 @@ export const deleteDuration = async (id: string): Promise<void> => {
   await db.runAsync("DELETE FROM duration WHERE id = ?", [id]);
 };
 
-// Filter duration by name or type
-export const filterDurations = async (keyword: string): Promise<Duration[]> => {
+// Filter duration by name or type with pagination
+export const filterDurations = async (
+  keyword: string,
+  page = 1,
+  pageSize = 10
+): Promise<PaginationResult<Duration>> => {
   const db = getDB();
   const param = `%${keyword}%`;
+  const offset = (page - 1) * pageSize;
 
-  const query = `
-    SELECT * FROM duration
-    WHERE name LIKE ?
-       OR type LIKE ?
-    ORDER BY created_at DESC
-  `;
+  const data = await db.getAllAsync<Duration>(
+    `
+      SELECT * FROM duration
+      WHERE name LIKE ?
+         OR type LIKE ?
+      ORDER BY created_at DESC
+      LIMIT ? OFFSET ?
+    `,
+    [param, param, pageSize, offset]
+  );
 
-  return await db.getAllAsync<Duration>(query, [param, param]);
+  const totalRow = await db.getFirstAsync<{ count: number }>(
+    `
+      SELECT COUNT(*) as count
+      FROM duration
+      WHERE name LIKE ?
+         OR type LIKE ?
+    `,
+    [param, param]
+  );
+
+  return {
+    data,
+    total: totalRow?.count ?? 0,
+    page,
+    pageSize,
+  };
 };
