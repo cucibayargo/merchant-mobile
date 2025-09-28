@@ -48,6 +48,7 @@ import { getLocales } from 'expo-localization'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Constants from 'expo-constants'
 import { BottomDrawer } from '@/components/bottomDrawer'
+import { AboutApp } from '@/components/aboutApp'
 
 type Service = {
     id: string
@@ -55,6 +56,7 @@ type Service = {
     badge?: string // e.g. "ONLY5K", "-75%", "30MINS"
     icon: any
     onPress?: () => void
+    isPrimary: boolean
 }
 
 const ServiceTile = ({ item }: { item: Service }) => {
@@ -150,6 +152,7 @@ const Home = () => {
             title: 'Layanan',
             badge: 'ONLY5K',
             icon: serviceIcon,
+            isPrimary: true,
             onPress: () => {
                 router.push('/service')
             },
@@ -159,6 +162,7 @@ const Home = () => {
             title: 'Durasi',
             badge: 'ONLY6K',
             icon: durationIcon,
+            isPrimary: true,
             onPress: () => {
                 router.push('/duration')
             },
@@ -168,12 +172,17 @@ const Home = () => {
             title: 'Pelanggan',
             badge: '-75%',
             icon: customerIcon,
+            isPrimary: true,
+            onPress: () => {
+                router.push('/customer ')
+            },
         },
         {
             id: 'report',
             title: 'Loporan',
             badge: 'FLAT5K',
             icon: reportIcon,
+            isPrimary: true,
             onPress: () => {
                 // open()
                 setIsReportFilterOpen(true)
@@ -185,6 +194,7 @@ const Home = () => {
             title: 'Ketentuan',
             badge: '30MINS',
             icon: noteIcon,
+            isPrimary: true,
             onPress: () => {
                 router.push('/note')
             },
@@ -193,8 +203,40 @@ const Home = () => {
             id: 'more',
             title: 'Lainnya',
             icon: moreIcon,
+            isPrimary: true,
             onPress: () => {
                 setShowMoreMenu(true)
+            },
+        },
+        {
+            id: 'support',
+            title: 'Support',
+            badge: '30MINS',
+            icon: noteIcon,
+            isPrimary: false,
+            onPress: async () => {
+                await Linking.openURL('https://wa.me/6285283811719')
+            },
+        },
+        {
+            id: 'faq',
+            title: 'FAQ',
+            badge: '30MINS',
+            icon: noteIcon,
+            isPrimary: false,
+            onPress: async () => {
+                await Linking.openURL('https://cucibayargo.com/#faq')
+            },
+        },
+        {
+            id: 'aboutSystem',
+            title: 'Tentang Sistem',
+            badge: '30MINS',
+            icon: noteIcon,
+            isPrimary: false,
+            onPress: () => {
+                setShowMoreMenu(false)
+                setIsAboutAppOpen(true)
             },
         },
     ]
@@ -211,6 +253,7 @@ const Home = () => {
         dateStyle: 'medium',
     })
     const [showMoreMenu, setShowMoreMenu] = useState(false)
+    const [isAboutAppOpen, setIsAboutAppOpen] = useState(false)
 
     useEffect(() => {
         if (isFocused) {
@@ -223,11 +266,6 @@ const Home = () => {
             setOrders(data?.data?.transactions)
         }
     }, [data])
-
-    const open = useCallback(() => {
-        setIsReportFilterOpen(true)
-        console.log('open')
-    }, [])
 
     const close = useCallback(() => {
         console.log('close')
@@ -318,7 +356,7 @@ const Home = () => {
                 ListHeaderComponent={
                     <View>
                         <FlatList
-                            data={SERVICES}
+                            data={SERVICES.filter((s) => s.isPrimary)}
                             keyExtractor={(i) => i.id}
                             numColumns={3}
                             columnWrapperStyle={styles.row}
@@ -447,8 +485,22 @@ const Home = () => {
                 open={showMoreMenu}
                 onClose={() => setShowMoreMenu(false)}
             >
-                <Text>Test</Text>
+                <View style={{ height: 500 }}>
+                    <FlatList
+                        data={SERVICES.filter((s) => s.id !== 'more')}
+                        keyExtractor={(i) => i.id}
+                        numColumns={3}
+                        columnWrapperStyle={{ gap: 50 }}
+                        renderItem={({ item }) => <ServiceTile item={item} />}
+                        scrollEnabled={false} // header list shouldn't scroll
+                    />
+                </View>
             </BottomDrawer>
+
+            <AboutApp
+                visible={isAboutAppOpen}
+                visibleChange={setIsAboutAppOpen}
+            />
         </SafeAreaView>
     )
 }

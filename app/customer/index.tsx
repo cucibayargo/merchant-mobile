@@ -1,8 +1,5 @@
 import CustomSearchBar from '@/components/customSearchBar'
 import { BreadcrumbContext } from '@/context/breadcrumb'
-import useDeleteService from '@/hooks/service/useDeleteService'
-import useGetServices from '@/hooks/service/useGetServices'
-import { IService } from '@/types/service'
 import { useRouter } from 'expo-router'
 import { Trash2 } from 'lucide-react-native'
 import React, { useCallback, useContext, useEffect, useState } from 'react'
@@ -16,21 +13,11 @@ import {
     View,
 } from 'react-native'
 import { Card } from 'react-native-paper'
+import useDeleteCustomer from '@/hooks/customer/useDeleteCustomer'
+import useGetCustomers from '@/hooks/customer/useGetCustomers'
+import { ICustomer } from '@/types/customer'
 
-interface IDuration {
-    id: string
-    name: string
-    duration: number
-    type: string
-}
-
-type GetDurationResponse = {
-    durations: IDuration[]
-    isLastPage: boolean
-    isFirstPage: boolean
-}
-
-export default function DurationIndex() {
+export default function CustomerIndex() {
     const { setTitle, setShowBackIcon, setPrevPath, setShowTitle } =
         useContext(BreadcrumbContext)
     const router = useRouter()
@@ -39,17 +26,15 @@ export default function DurationIndex() {
     const [page, setPage] = useState<number>(1)
     const limit: number = 10
 
-    const [services, setServices] = useState<IService[]>([])
+    const [customers, setCustomers] = useState<ICustomer[]>([])
     const [isLastPage, setIsLastPage] = useState<boolean>(false)
     const [isFirstPage, setIsFirstPage] = useState<boolean>(true)
     const [loadingMore, setLoadingMore] = useState<boolean>(false)
-    const { data, isLoading, refetch, isRefetching } = useGetServices({
-        filter,
-        limit,
-        page,
-    })
-    const { mutateAsync: deleteService, isSuccess: isDeleteSuccess } =
-        useDeleteService()
+    const {
+        mutateAsync: deleteCustomer,
+        isSuccess: isDeleteCustomerSuccess,
+        isPending: isDeleteCustomerPending,
+    } = useDeleteCustomer()
 
     useEffect(() => {
         setShowTitle(true)
@@ -58,12 +43,18 @@ export default function DurationIndex() {
         setPrevPath('settings')
     }, [])
 
+    const { data, isLoading, refetch, isRefetching } = useGetCustomers({
+        filter,
+        page,
+        limit,
+    })
+
     useEffect(() => {
         if (data) {
-            setServices(
+            setCustomers(
                 page === 1
-                    ? data?.data.services
-                    : [...services, ...data?.data.services]
+                    ? data.data.customers
+                    : [...customers, ...data.data.customers]
             )
             setLoadingMore(false)
             setIsLastPage(data.data.isLastPage)
@@ -76,10 +67,10 @@ export default function DurationIndex() {
     }, [data])
 
     useEffect(() => {
-        if (isDeleteSuccess) {
+        if (isDeleteCustomerSuccess) {
             refetch()
         }
-    }, [isDeleteSuccess])
+    }, [isDeleteCustomerSuccess])
 
     const loadMore = () => {
         if (loadingMore || isLastPage) return
@@ -88,30 +79,30 @@ export default function DurationIndex() {
     }
 
     const navigateToCreate = () =>
-        router.push({ pathname: '/service/create' } as never)
+        router.push({ pathname: '/customer/create' } as never)
 
     const navigateToDetail = (id: string) =>
         router.push({
-            pathname: '/service/[id]',
+            pathname: '/customer/[id]',
             params: { id },
         } as never)
 
-    const confirmDelete = useCallback((service: IService) => {
+    const confirmDelete = useCallback((customer: ICustomer) => {
         Alert.alert(
-            'Hapus Layanan?',
-            `Anda yakin menghapus layanan ${service.name}`,
+            'Hapus Pelanggan?',
+            `Anda yakin menghapus pelanggan ${customer.name}`,
             [
                 { text: 'Batal', style: 'cancel' },
                 {
                     text: 'Hapus',
                     style: 'destructive',
-                    onPress: () => deleteService(service.id),
+                    onPress: () => deleteCustomer(customer.id),
                 },
             ]
         )
     }, [])
 
-    const renderItem = ({ item }: { item: IService }) => (
+    const renderItem = ({ item }: { item: ICustomer }) => (
         <TouchableOpacity
             onPress={() => navigateToDetail(item.id)}
             style={{ marginBottom: 10 }}
@@ -123,9 +114,12 @@ export default function DurationIndex() {
                         justifyContent: 'space-between',
                     }}
                 >
-                    <Text style={{ fontWeight: '600', marginBottom: 5 }}>
-                        {item.name}
-                    </Text>
+                    <View>
+                        <Text style={{ fontWeight: '600', marginBottom: 5 }}>
+                            {item.name}
+                        </Text>
+                        <Text>{item.phone_number}</Text>
+                    </View>
 
                     <Trash2
                         color={'#a33929'}
@@ -141,32 +135,34 @@ export default function DurationIndex() {
         <SafeAreaView style={{ backgroundColor: '#f0eeeb', flex: 1 }}>
             <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
                 <CustomSearchBar
-                    placeholder="Cari layanan..."
+                    placeholder="Cari Pelanggan..."
                     query={filter}
                     onSearch={setFilter}
                 />
 
-                {(isLoading || (isRefetching && page === 1)) && (
-                    <View style={{ paddingTop: 24 }}>
+                {(isLoading ||
+                    isDeleteCustomerPending ||
+                    (isRefetching && page === 1)) && (
+                    <View style={{ marginTop: 24 }}>
                         <ActivityIndicator />
                     </View>
                 )}
 
-                {!isLoading && services.length === 0 ? (
+                {!isLoading && customers.length === 0 ? (
                     <Text style={{ textAlign: 'center', marginTop: 24 }}>
                         Tidak Ada Durasi
                     </Text>
                 ) : (
                     <FlatList
                         style={{ marginTop: 16 }}
-                        data={services}
+                        data={customers}
                         keyExtractor={(item) => item.id}
                         renderItem={renderItem}
                         onEndReachedThreshold={0.5}
                         onEndReached={loadMore}
                         ListFooterComponent={
                             loadingMore && !isLastPage ? (
-                                <View style={{ paddingHorizontal: 16 }}>
+                                <View style={{ marginVertical: 16 }}>
                                     <ActivityIndicator />
                                 </View>
                             ) : null

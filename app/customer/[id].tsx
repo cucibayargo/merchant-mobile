@@ -1,22 +1,22 @@
 import { FormField } from '@/components/formInput'
-import useGetDetailDuration from '@/hooks/duration/useGetDetailDuration'
-import useUpdateDuration from '@/hooks/duration/useUpdateDuration'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import React, { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { SafeAreaView, View } from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
 import { Button } from 'react-native-paper'
 import { z } from 'zod'
+import useUpdateCustomer from '@/hooks/customer/useUpdateCustomer'
+import useGetCustomer from '@/hooks/customer/useGetCustomer'
 
-export default function DurationDetail() {
+export default function CustomerDetail() {
     const { id } = useLocalSearchParams<{ id: string }>()
-    const router = useRouter()
     const formSchema = z.object({
         name: z.string().min(1, { message: 'Nama wajib diisi' }),
-        duration: z.number().min(1, { message: 'Durasi wajib diisi' }),
-        type: z.string().min(1, { message: 'Tipe wajib diisi' }),
+        phone_number: z.string().min(1, { message: 'No HP wajib diisi' }),
+        gender: z.string().min(1, { message: 'Jenis Kelamin Wajib diisi' }),
+        address: z.string(),
     })
     const {
         control,
@@ -27,14 +27,15 @@ export default function DurationDetail() {
         resolver: zodResolver(formSchema),
         defaultValues: {
             name: '',
-            duration: '',
-            type: '',
+            phone_number: '',
+            gender: 'Laki-laki',
+            address: '',
         },
         mode: 'onChange',
     })
-    const { data, isLoading } = useGetDetailDuration(id!)
-    const { mutateAsync: updateDuration, isPending: isPendingUpdate } =
-        useUpdateDuration(id!)
+    const { data, isLoading } = useGetCustomer(id!)
+    const { mutateAsync: updateCustomer, isPending: isUpdateCustomerPending } =
+        useUpdateCustomer(id!)
 
     useEffect(() => {
         if (id) {
@@ -43,12 +44,12 @@ export default function DurationDetail() {
     }, [data])
 
     const handleSave = async (data: ChangePasswordForm) => {
-        updateDuration(data)
+        updateCustomer(data)
     }
 
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
-            <Spinner visible={isLoading || isPendingUpdate} />
+            <Spinner visible={isLoading || isUpdateCustomerPending} />
 
             <View style={{ padding: 16 }}>
                 <FormField.PaperInput<CustomForm, 'name'>
@@ -58,35 +59,37 @@ export default function DurationDetail() {
                     autoCapitalize="none"
                 />
 
-                <FormField.PaperNumber<CustomForm, 'duration'>
+                <FormField.PaperNumber<CustomForm, 'phone_number'>
                     control={control}
-                    name="duration"
-                    label="Durasi"
+                    name="phone_number"
+                    label="No Hp"
                     precision={0}
                     min={1}
                 />
 
-                <FormField.PaperSelect<CustomForm, 'type'>
+                <FormField.PaperSelect<CustomForm, 'gender'>
                     control={control}
-                    name="type"
-                    label="Tipe"
+                    name="gender"
+                    label="Jenis Kelamin"
                     options={[
                         {
-                            value: 'Jam',
-                            label: 'Jam',
+                            value: 'Laki-laki',
+                            label: 'Laki-laki',
                         },
                         {
-                            value: 'Hari',
-                            label: 'Hari',
+                            value: 'Perempuan',
+                            label: 'Perempuan',
                         },
                     ]}
                 />
 
-                <Button
-                    mode="contained"
-                    // style={styles.submitButton}
-                    onPress={handleSubmit(handleSave)}
-                >
+                <FormField.PaperTextArea<CustomForm, 'address'>
+                    control={control}
+                    name="address"
+                    label="Alamat"
+                />
+
+                <Button mode="contained" onPress={handleSubmit(handleSave)}>
                     Simpan
                 </Button>
             </View>

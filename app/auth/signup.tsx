@@ -96,7 +96,9 @@ const Signup = () => {
         >
             <Spinner visible={isPending} />
 
-            <Text className={'text-2xl font-bold mb-5'}>Daftar Akun</Text>
+            <Text style={{ fontSize: 24, fontWeight: 700, marginBottom: 20 }}>
+                Daftar Akun
+            </Text>
 
             <View>
                 <FormField.PaperInput<CustomForm, 'name'>
