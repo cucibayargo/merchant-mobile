@@ -4,6 +4,9 @@ import moreIcon from '@/assets/images/more-icon.png'
 import noteIcon from '@/assets/images/note-icon.png'
 import reportIcon from '@/assets/images/report-icon.png'
 import serviceIcon from '@/assets/images/service-icon.png'
+import faqIcon from '@/assets/images/faq-icon.png'
+import supportIcon from '@/assets/images/support-icon.png'
+import aboutIcon from '@/assets/images/about-icon.png'
 import OrderCard from '@/components/orderCard'
 import { useUser } from '@/context/user'
 import useGetOrders from '@/hooks/order/useGetOrders'
@@ -212,7 +215,7 @@ const Home = () => {
             id: 'support',
             title: 'Support',
             badge: '30MINS',
-            icon: noteIcon,
+            icon: supportIcon,
             isPrimary: false,
             onPress: async () => {
                 await Linking.openURL('https://wa.me/6285283811719')
@@ -222,7 +225,7 @@ const Home = () => {
             id: 'faq',
             title: 'FAQ',
             badge: '30MINS',
-            icon: noteIcon,
+            icon: faqIcon,
             isPrimary: false,
             onPress: async () => {
                 await Linking.openURL('https://cucibayargo.com/#faq')
@@ -232,7 +235,7 @@ const Home = () => {
             id: 'aboutSystem',
             title: 'Tentang Sistem',
             badge: '30MINS',
-            icon: noteIcon,
+            icon: aboutIcon,
             isPrimary: false,
             onPress: () => {
                 setShowMoreMenu(false)
@@ -336,7 +339,10 @@ const Home = () => {
                     {user?.logo ? (
                         <Avatar.Image size={30} source={{ uri: user.logo }} />
                     ) : (
-                        <Avatar.Text size={24} label="XD" />
+                        <Avatar.Text
+                            size={35}
+                            label={user?.name[0]?.toUpperCase() ?? '?'}
+                        />
                     )}
                 </View>
             </View>
@@ -485,15 +491,31 @@ const Home = () => {
                 open={showMoreMenu}
                 onClose={() => setShowMoreMenu(false)}
             >
-                <View style={{ height: 500 }}>
-                    <FlatList
-                        data={SERVICES.filter((s) => s.id !== 'more')}
-                        keyExtractor={(i) => i.id}
-                        numColumns={3}
-                        columnWrapperStyle={{ gap: 50 }}
-                        renderItem={({ item }) => <ServiceTile item={item} />}
-                        scrollEnabled={false} // header list shouldn't scroll
-                    />
+                <View
+                    style={{
+                        height: 500,
+                        // justifyContent: 'center',
+                        // margin: 'auto',
+                    }}
+                >
+                    <View>
+                        <FlatList
+                            data={SERVICES.filter((s) => s.id !== 'more')}
+                            keyExtractor={(i) => i.id}
+                            numColumns={3}
+                            columnWrapperStyle={{
+                                gap: 50,
+                            }}
+                            contentContainerStyle={{
+                                justifyContent: 'center',
+                                width: '100%',
+                            }}
+                            renderItem={({ item }) => (
+                                <ServiceTile item={item} />
+                            )}
+                            scrollEnabled={false} // header list shouldn't scroll
+                        />
+                    </View>
                 </View>
             </BottomDrawer>
 

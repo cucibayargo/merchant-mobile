@@ -116,7 +116,7 @@ const Loading = () => {
 
 const Tab = createMaterialTopTabNavigator()
 
-const Order = () => {
+const OrderIndex = () => {
     const [orders, setOrders] = useState<IOngoingOrder[]>([])
     const [filter, setFilter] = useState<string>('')
     const limit: number = 10
@@ -204,4 +204,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default Order
+export default OrderIndex

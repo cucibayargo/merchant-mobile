@@ -1,11 +1,11 @@
 import React, { memo } from 'react'
-import { View, Pressable, Text } from 'react-native'
+import { Pressable, Text, View } from 'react-native'
 // import { styled } from 'nativewind'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
+import { useRouter } from 'expo-router'
 
 type Navigation = StackNavigationProp<RootStackParamList, 'Main'>
 
@@ -19,10 +19,13 @@ const OrderCard = ({
     idx,
     openConfirmationDialog,
 }: IOrderCardProps) => {
-    const navigation = useNavigation<Navigation>()
+    const router = useRouter()
 
     const handleCardPress = () => {
-        navigation.navigate('OrderDetails', { orderId: data.id })
+        router.push({
+            pathname: '/(tabs)/order/[id]',
+            params: { id: String(data.invoice) },
+        } as never)
     }
 
     const handleChecklistPress = async () => {
@@ -31,7 +34,6 @@ const OrderCard = ({
             data.status === 'Siap Diambil'
         ) {
             await AsyncStorage.setItem('orderMode', 'orders')
-            navigation.navigate('Payment', { invoice: data.invoice })
             return
         }
 

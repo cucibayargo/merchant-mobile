@@ -1,8 +1,9 @@
+import { Tabs, useRouter } from 'expo-router'
+import { ClipboardPlus, House, ScrollText, User } from 'lucide-react-native'
 import React from 'react'
-import { ScrollText, House, ClipboardPlus, User } from 'lucide-react-native'
-import { Tabs } from 'expo-router'
 
 const MainTabNavigator = () => {
+    const router = useRouter()
     return (
         <Tabs
             screenOptions={({ route }) => ({
@@ -15,7 +16,10 @@ const MainTabNavigator = () => {
                         ) : (
                             <House size={size} color={color} strokeWidth={1} />
                         )
-                    } else if (route.name === 'order') {
+                    } else if (
+                        route.name === 'order/index' ||
+                        route.name === 'order'
+                    ) {
                         icon = focused ? (
                             <ScrollText size={size} color={color} />
                         ) : (
@@ -58,16 +62,22 @@ const MainTabNavigator = () => {
             />
 
             <Tabs.Screen
-                name="createOrder"
+                name="order/index"
                 options={{
-                    title: 'Buat Baru',
+                    title: 'Order',
+                    headerShown: false,
+                }}
+                listeners={{
+                    tabPress: () => {
+                        router.replace('/(tabs)/order/index')
+                    },
                 }}
             />
 
             <Tabs.Screen
-                name="order"
+                name="createOrder"
                 options={{
-                    title: 'Order',
+                    title: 'Buat Baru',
                 }}
             />
 
