@@ -2,7 +2,9 @@
 import noDataIcon from '@/assets/images/no-data.png'
 import CustomSearchBar from '@/components/customSearchBar'
 import OrderCard from '@/components/orderCard'
+import OrderCardSkeleton from '@/components/orderCard.skeleton'
 import useGetOrders from '@/hooks/order/useGetOrders'
+import { IOngoingOrder } from '@/types/order'
 import { useIsFocused } from '@react-navigation/core'
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
 import React, { useEffect, useState } from 'react'
@@ -15,7 +17,6 @@ import {
     Text,
     View,
 } from 'react-native'
-import Spinner from 'react-native-loading-spinner-overlay'
 
 const TABS: { key: string; label: string }[] = [
     { key: 'Diproses', label: 'Proses' },
@@ -71,7 +72,6 @@ const OrderList = ({ tab, orders, onChangeTab, onRefresh }: OrderListProps) => {
     useEffect(() => {
         if (isFocused) {
             onChangeTab(tab)
-            onRefresh()
         }
     }, [isFocused, tab])
 
@@ -92,7 +92,9 @@ const OrderList = ({ tab, orders, onChangeTab, onRefresh }: OrderListProps) => {
                 />
             )}
             keyExtractor={(item) => item.id}
-            contentContainerStyle={{ paddingVertical: 10 }}
+            contentContainerStyle={{
+                paddingVertical: 10,
+            }}
             refreshControl={
                 <RefreshControl
                     refreshing={refreshing}
@@ -172,21 +174,38 @@ const OrderIndex = () => {
                     name={t.label}
                     options={{ lazyPlaceholder: () => <Loading /> }}
                     children={() => (
-                        <View style={{ paddingHorizontal: 10 }}>
-                            <Spinner visible={isLoading || isRefetching} />
+                        <View
+                            style={{
+                                paddingHorizontal: 10,
+                                paddingVertical: 10,
+                                backgroundColor: '#fff',
+                                flex: 1,
+                            }}
+                        >
+                            <View className="mt-7">
+                                <CustomSearchBar
+                                    placeholder="Cari order..."
+                                    query={filter}
+                                    onSearch={setFilter}
+                                />
+                            </View>
 
-                            <CustomSearchBar
-                                placeholder="Cari order..."
-                                query={filter}
-                                onSearch={setFilter}
-                            />
-
-                            <OrderList
-                                tab={t.key as OrderType}
-                                orders={orders}
-                                onChangeTab={changeTabHandler}
-                                onRefresh={refetch}
-                            />
+                            {isLoading || isRefetching ? (
+                                <View style={{ paddingVertical: 10 }}>
+                                    {[...Array(6)].map((_, i) => (
+                                        <OrderCardSkeleton
+                                            key={`order-skeleton-${i}`}
+                                        />
+                                    ))}
+                                </View>
+                            ) : (
+                                <OrderList
+                                    tab={t.key as OrderType}
+                                    orders={orders}
+                                    onChangeTab={changeTabHandler}
+                                    onRefresh={refetch}
+                                />
+                            )}
                         </View>
                     )}
                 />

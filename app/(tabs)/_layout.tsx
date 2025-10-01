@@ -7,6 +7,7 @@ const MainTabNavigator = () => {
     return (
         <Tabs
             screenOptions={({ route }) => ({
+                headerShown: false,
                 tabBarIcon: ({ focused, color, size }) => {
                     let icon
 
@@ -66,11 +67,7 @@ const MainTabNavigator = () => {
                 options={{
                     title: 'Order',
                     headerShown: false,
-                }}
-                listeners={{
-                    tabPress: () => {
-                        router.replace('/(tabs)/order/index')
-                    },
+                    href: '/(tabs)/order/index',
                 }}
             />
 
