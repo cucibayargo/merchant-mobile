@@ -12,8 +12,8 @@ import {
     Receipt,
     User2,
 } from 'lucide-react-native'
-import React, { useEffect, useState } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
+import { Animated, Easing, Pressable, ScrollView, View } from 'react-native'
 import { Text } from 'react-native-paper'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -22,7 +22,7 @@ const OrderDetail = () => {
     const router = useRouter()
     const { id } = useLocalSearchParams<{ id: string }>()
     const insets = useSafeAreaInsets()
-    const { data: orderResponse } = useGetOrder(id)
+    const { data: orderResponse, isLoading, isFetching } = useGetOrder(id)
     const [order, setOrder] = useState<IOrder>({
         transaction_id: '',
         customer_id: '',
@@ -69,6 +69,319 @@ const OrderDetail = () => {
             </Text>
         </View>
     )
+
+    const shimmer = useRef(new Animated.Value(0)).current
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.timing(shimmer, {
+                toValue: 1,
+                duration: 1200,
+                easing: Easing.linear,
+                useNativeDriver: true,
+            })
+        ).start()
+    }, [shimmer])
+
+    const SkeletonBlock = ({
+        height,
+        width,
+        style,
+    }: {
+        height: number
+        width: number | string
+        style?: any
+    }) => {
+        const translateX = shimmer.interpolate({
+            inputRange: [0, 1],
+            outputRange: [-100, 600],
+        })
+
+        return (
+            <View
+                style={[
+                    {
+                        height,
+                        width,
+                        backgroundColor: '#E5E7EB',
+                        borderRadius: 8,
+                        overflow: 'hidden',
+                    },
+                    style,
+                ]}
+            >
+                <Animated.View
+                    pointerEvents="none"
+                    style={{
+                        position: 'absolute',
+                        top: 0,
+                        bottom: 0,
+                        width: 80,
+                        opacity: 0.5,
+                        backgroundColor: '#FFFFFF',
+                        transform: [{ translateX }],
+                    }}
+                />
+            </View>
+        )
+    }
+
+    const renderSkeleton = () => (
+        <View style={{ flex: 1, backgroundColor: '#F3F4F6' }}>
+            <View
+                style={{
+                    backgroundColor: '#ffffff',
+                    paddingTop: 48,
+                    paddingHorizontal: 16,
+                    paddingBottom: 12,
+                    borderBottomWidth: 1,
+                    borderColor: '#E5E7EB',
+                }}
+            >
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <SkeletonBlock
+                        height={28}
+                        width={28}
+                        style={{ borderRadius: 999 }}
+                    />
+                    <SkeletonBlock
+                        height={18}
+                        width={160}
+                        style={{ marginLeft: 8, borderRadius: 4 }}
+                    />
+                </View>
+            </View>
+
+            <ScrollView
+                contentContainerStyle={{
+                    padding: 16,
+                    paddingBottom: (insets.bottom || 0) + 120,
+                }}
+            >
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        marginBottom: 12,
+                    }}
+                >
+                    <SkeletonBlock
+                        height={32}
+                        width={160}
+                        style={{ borderRadius: 999 }}
+                    />
+                    <View style={{ flexDirection: 'row' }}>
+                        <SkeletonBlock
+                            height={40}
+                            width={40}
+                            style={{ borderRadius: 999, marginRight: 8 }}
+                        />
+                        <SkeletonBlock
+                            height={40}
+                            width={40}
+                            style={{ borderRadius: 999 }}
+                        />
+                    </View>
+                </View>
+
+                <View
+                    style={{
+                        backgroundColor: '#ffffff',
+                        borderRadius: 12,
+                        padding: 16,
+                        marginBottom: 16,
+                        shadowColor: '#000',
+                        shadowOpacity: 0.04,
+                        shadowRadius: 8,
+                        shadowOffset: { width: 0, height: 2 },
+                        elevation: 1,
+                    }}
+                >
+                    <SkeletonBlock height={16} width={200} />
+                    <SkeletonBlock
+                        height={16}
+                        width={160}
+                        style={{ marginTop: 12 }}
+                    />
+                    <SkeletonBlock
+                        height={16}
+                        width={'80%'}
+                        style={{ marginTop: 12 }}
+                    />
+                </View>
+
+                <View
+                    style={{
+                        backgroundColor: '#ffffff',
+                        borderRadius: 12,
+                        padding: 12,
+                        marginBottom: 16,
+                        shadowColor: '#000',
+                        shadowOpacity: 0.04,
+                        shadowRadius: 8,
+                        shadowOffset: { width: 0, height: 2 },
+                        elevation: 1,
+                    }}
+                >
+                    {[0, 1, 2].map((i) => (
+                        <View
+                            key={i}
+                            style={{
+                                paddingVertical: 12,
+                                borderBottomWidth: i !== 2 ? 1 : 0,
+                                borderColor: '#F3F4F6',
+                            }}
+                        >
+                            <SkeletonBlock height={18} width={200} />
+                            <SkeletonBlock
+                                height={14}
+                                width={120}
+                                style={{ marginTop: 6 }}
+                            />
+                        </View>
+                    ))}
+                </View>
+
+                <View
+                    style={{
+                        backgroundColor: '#ffffff',
+                        borderRadius: 12,
+                        padding: 16,
+                        marginBottom: 32,
+                        shadowColor: '#000',
+                        shadowOpacity: 0.04,
+                        shadowRadius: 8,
+                        shadowOffset: { width: 0, height: 2 },
+                        elevation: 1,
+                    }}
+                >
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            gap: 12,
+                        }}
+                    >
+                        <View style={{ flex: 1 }}>
+                            <SkeletonBlock height={12} width={120} />
+                            <SkeletonBlock
+                                height={16}
+                                width={'80%'}
+                                style={{ marginTop: 8 }}
+                            />
+                            <SkeletonBlock
+                                height={12}
+                                width={100}
+                                style={{ marginTop: 16 }}
+                            />
+                            <SkeletonBlock
+                                height={16}
+                                width={'70%'}
+                                style={{ marginTop: 8 }}
+                            />
+                            <SkeletonBlock
+                                height={12}
+                                width={80}
+                                style={{ marginTop: 16 }}
+                            />
+                            <SkeletonBlock
+                                height={16}
+                                width={'60%'}
+                                style={{ marginTop: 8 }}
+                            />
+                        </View>
+                        <View style={{ flex: 1 }}>
+                            <SkeletonBlock height={12} width={120} />
+                            <SkeletonBlock
+                                height={16}
+                                width={'75%'}
+                                style={{ marginTop: 8 }}
+                            />
+                            <SkeletonBlock
+                                height={12}
+                                width={140}
+                                style={{ marginTop: 16 }}
+                            />
+                            <SkeletonBlock
+                                height={16}
+                                width={'65%'}
+                                style={{ marginTop: 8 }}
+                            />
+                            <SkeletonBlock
+                                height={12}
+                                width={100}
+                                style={{ marginTop: 16 }}
+                            />
+                            <SkeletonBlock
+                                height={16}
+                                width={'50%'}
+                                style={{ marginTop: 8 }}
+                            />
+                        </View>
+                    </View>
+                </View>
+            </ScrollView>
+
+            <View
+                style={{
+                    position: 'absolute',
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: '#ffffff',
+                    paddingHorizontal: 16,
+                    paddingTop: 12,
+                    paddingBottom: insets.bottom || 20,
+                    borderTopWidth: 1,
+                    borderColor: '#E5E7EB',
+                    shadowColor: '#000',
+                    shadowOpacity: 0.06,
+                    shadowRadius: 8,
+                    shadowOffset: { width: 0, height: -2 },
+                    elevation: 6,
+                    zIndex: 10,
+                }}
+            >
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                    }}
+                >
+                    <View>
+                        <SkeletonBlock
+                            height={12}
+                            width={40}
+                            style={{ borderRadius: 4 }}
+                        />
+                        <SkeletonBlock
+                            height={18}
+                            width={120}
+                            style={{ marginTop: 6 }}
+                        />
+                    </View>
+                    <View style={{ alignItems: 'flex-end' }}>
+                        <SkeletonBlock
+                            height={12}
+                            width={120}
+                            style={{ borderRadius: 4 }}
+                        />
+                        <SkeletonBlock
+                            height={16}
+                            width={100}
+                            style={{ marginTop: 6 }}
+                        />
+                    </View>
+                </View>
+            </View>
+        </View>
+    )
+
+    if (isLoading || isFetching) {
+        return renderSkeleton()
+    }
 
     return (
         <View style={{ flex: 1, backgroundColor: '#F3F4F6' }}>
