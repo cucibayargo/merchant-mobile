@@ -1,7 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
-import { generateUrlWithParams } from '@/libs/generateUrlWithParams'
 import axiosInstance from '@/libs/axios'
+import { generateUrlWithParams } from '@/libs/generateUrlWithParams'
 import { IGetCustomerProps } from '@/types/customer'
+import { useQuery } from '@tanstack/react-query'
 
 const useGetCustomers = (props: IGetCustomerProps) => {
     const url: string = generateUrlWithParams(`/customer?`, props)
@@ -9,6 +9,7 @@ const useGetCustomers = (props: IGetCustomerProps) => {
         queryKey: ['customers', props],
         queryFn: async () => axiosInstance.get(url),
         throwOnError: true,
+        staleTime: Infinity,
     })
 }
 
