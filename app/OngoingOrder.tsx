@@ -96,6 +96,7 @@ const OngoingOrder = () => {
 
     return (
         <View className={'flex-1 bg-gray-100'}>
+            <Text>Test</Text>
             <View className={'bg-white sticky w-full p-4 mb-2 z-50'}>
                 <TextInput
                     placeholder="Pencarian No Nota & Nama..."

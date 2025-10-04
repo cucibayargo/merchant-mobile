@@ -1,17 +1,13 @@
-import React, { memo } from 'react'
-import { View, Pressable, Text } from 'react-native'
-// import { styled } from 'nativewind'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { useNavigation } from '@react-navigation/native'
 import { StackNavigationProp } from '@react-navigation/stack'
 import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
+import { useRouter } from 'expo-router'
+import { CalendarDaysIcon, ThumbsDown, ThumbsUp } from 'lucide-react-native'
+import React, { memo } from 'react'
+import { Pressable, Text, View } from 'react-native'
 
 type Navigation = StackNavigationProp<RootStackParamList, 'Main'>
-
-// const View = styled(RNView)
-// const Pressable = styled(RNPressable)
-// const Text = styled(RNText)
 
 const OrderCard = ({
     type,
@@ -19,10 +15,13 @@ const OrderCard = ({
     idx,
     openConfirmationDialog,
 }: IOrderCardProps) => {
-    const navigation = useNavigation<Navigation>()
+    const router = useRouter()
 
     const handleCardPress = () => {
-        navigation.navigate('OrderDetails', { orderId: data.id })
+        router.push({
+            pathname: '/(tabs)/order/[id]',
+            params: { id: String(data.invoice) },
+        } as never)
     }
 
     const handleChecklistPress = async () => {
@@ -31,7 +30,6 @@ const OrderCard = ({
             data.status === 'Siap Diambil'
         ) {
             await AsyncStorage.setItem('orderMode', 'orders')
-            navigation.navigate('Payment', { invoice: data.invoice })
             return
         }
 
@@ -45,11 +43,9 @@ const OrderCard = ({
     return (
         <Pressable
             style={{
-                borderWidth: 1,
                 backgroundColor: 'white',
-                marginBottom: 8,
-                borderColor: isPaid ? '#75b855' : '#db6161',
-                borderRadius: 10,
+                paddingHorizontal: 10,
+                paddingVertical: 8,
             }}
             onPress={handleCardPress}
             accessibilityLabel={`order-${idx + 1}`}
@@ -57,96 +53,86 @@ const OrderCard = ({
             <View
                 style={{
                     flexDirection: 'row',
-                    justifyContent: 'space-between',
-                    padding: 12,
                     alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: 16,
                 }}
             >
-                <Text style={{ fontWeight: 700 }}>{data.invoice}</Text>
-                {type !== 'Selesai' ? (
-                    <Pressable
-                        onPress={handleChecklistPress}
-                        hitSlop={8}
-                        accessibilityLabel="checklist-btn"
-                    ></Pressable>
-                ) : (
-                    <Text
-                        style={{
-                            fontSize: 14,
-                            fontWeight: 200,
-                            marginTop: 'auto',
-                        }}
-                    >
+                <Text style={{ fontSize: 18, fontWeight: 700 }}>
+                    {data.customer}
+                </Text>
+            </View>
+
+            <Text style={{ fontSize: 16, color: '#9CA3AF', marginBottom: 4 }}>
+                {data.invoice}
+            </Text>
+
+            <View
+                style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 20,
+                    marginBottom: 14,
+                }}
+            >
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 8,
+                    }}
+                >
+                    <CalendarDaysIcon color="#111827" size={12} />
+                    <Text style={{ fontSize: 12 }}>
                         {format(
-                            new Date(data.completed_at),
+                            new Date(data.created_at),
                             'dd MMM yyyy HH:mm',
                             {
                                 locale: id,
                             }
                         )}
                     </Text>
-                )}
-            </View>
+                </View>
 
-            <View
-                style={{
-                    paddingHorizontal: 16,
-                    paddingVertical: 8,
-                    justifyContent: 'space-between',
-                    borderBottomStartRadius: 10,
-                }}
-            >
-                <View>
-                    <Text style={{ fontSize: 14, fontWeight: 200 }}>
-                        {data.customer}
-                    </Text>
+                <View
+                    style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 8,
+                    }}
+                >
+                    {isPaid ? (
+                        <ThumbsUp color="#75b855" size={12} />
+                    ) : (
+                        <ThumbsDown color="#ff3b30" size={12} />
+                    )}
                     <Text
                         style={{
-                            fontSize: 14,
-                            color: isPaid ? '#75b855' : '#db6161',
+                            fontSize: 12,
+                            color: isPaid ? '#75b855' : '#ff3b30',
                         }}
                     >
                         {data.payment_status}
                     </Text>
                 </View>
-
-                {type === 'Diproses' && (
-                    <Text
-                        className="text-sm font-thin mt-auto"
-                        style={{
-                            fontSize: 14,
-                            fontWeight: 200,
-                            marginTop: 'auto',
-                        }}
-                    >
-                        {format(
-                            new Date(data.estimated_date),
-                            'dd MMM yyyy dd:mm',
-                            {
-                                locale: id,
-                            }
-                        )}
-                    </Text>
-                )}
-
-                {type === 'Siap Diambil' && (
-                    <Text
-                        style={{
-                            fontSize: 14,
-                            fontWeight: 100,
-                            marginTop: 'auto',
-                        }}
-                    >
-                        {format(
-                            new Date(data.ready_to_pick_up_at),
-                            'dd MMM yyyy',
-                            {
-                                locale: id,
-                            }
-                        )}
-                    </Text>
-                )}
             </View>
+
+            {type === 'Selesai' && (
+                <Text
+                    style={{
+                        fontSize: 14,
+                        fontWeight: 200,
+                    }}
+                >
+                    {format(new Date(data.completed_at), 'dd MMM yyyy HH:mm', {
+                        locale: id,
+                    })}
+                </Text>
+            )}
+
+            <View
+                style={{ height: 1, backgroundColor: '#E5E7EB', marginTop: 4 }}
+            />
         </Pressable>
     )
 }

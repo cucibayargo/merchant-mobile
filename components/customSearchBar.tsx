@@ -22,6 +22,7 @@ const CustomSearchBar = ({
                 borderTopRightRadius: 20,
                 borderBottomLeftRadius: 20,
                 borderBottomRightRadius: 20,
+                borderWidth: 1,
             }}
             inputStyle={{
                 fontSize: 14,

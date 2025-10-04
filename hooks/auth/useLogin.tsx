@@ -1,7 +1,7 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import axiosInstance from '@/libs/axios'
-import { useRouter } from 'expo-router'
 import useGetUserDetails from '@/hooks/user/useGetUserDetails'
+import axiosInstance from '@/libs/axios'
+import { useMutation } from '@tanstack/react-query'
+import { useRouter } from 'expo-router'
 
 interface IPayload {
     email: string

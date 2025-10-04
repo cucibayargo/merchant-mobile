@@ -7,6 +7,8 @@ const axiosInstance = axios.create({
     withCredentials: true,
 })
 
+console.log("API_URL:", Constants.expoConfig?.extra?.API_URL)
+
 axiosInstance.interceptors.request.use((config) => {
     ;(config as any).__startedAt = Date.now()
     const { method, url, headers, data } = config
