@@ -1,25 +1,24 @@
-import React, { useEffect } from 'react'
-import {
-    View,
-    Text,
-    TextInput,
-    Image,
-    Button,
-    TouchableOpacity,
-    StyleSheet,
-    SafeAreaView,
-} from 'react-native'
-import { z } from 'zod'
-import { Controller, useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { FormField } from '@/components/formInput'
 import { images } from '@/constans/images'
-import { useRouter } from 'expo-router'
+import { useUser } from '@/context/user'
+import { loginOffline } from '@/database/models/auth'
 import useLogin from '@/hooks/auth/useLogin'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useRouter } from 'expo-router'
+import React, { useEffect } from 'react'
+import { useForm } from 'react-hook-form'
+import {
+  Button,
+  Image,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
-import useGetUserDetails from '@/hooks/user/useGetUserDetails'
-import { useUser } from '@/context/user'
-import { FormField } from '@/components/formInput'
+import { z } from 'zod'
 
 const Login = () => {
     const router = useRouter()
@@ -60,9 +59,12 @@ const Login = () => {
         }
     }, [])
 
-    const onSubmit = (data: z.infer<typeof formSchema>) => {
+    const onSubmit = async (data: z.infer<typeof formSchema>) => {
         console.log('data', data)
-        login(data)
+      // login(data)
+      const resp = await loginOffline(data)
+      console.log(resp);
+      
     }
 
     return (

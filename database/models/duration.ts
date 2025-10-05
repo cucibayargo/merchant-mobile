@@ -26,7 +26,7 @@ type PaginationResult<T> = {
 
 // Add duration
 export const addDuration = async (payload: DurationPayload) => {
-  const db = getDB();
+  const db = await getDB();
   const id = randomUUID();
   const created_at = new Date().toISOString();
 
@@ -51,7 +51,7 @@ export const getDurations = async (
   page = 1,
   pageSize = 10
 ): Promise<PaginationResult<Duration>> => {
-  const db = getDB();
+  const db = await getDB();
   const offset = (page - 1) * pageSize;
 
   const data = await db.getAllAsync<Duration>(
@@ -73,7 +73,7 @@ export const getDurations = async (
 
 // Get single duration by ID
 export const getDurationById = async (id: string): Promise<Duration | null> => {
-  const db = getDB();
+  const db = await getDB();
   return await db.getFirstAsync<Duration>(
     "SELECT * FROM duration WHERE id = ?",
     [id]
@@ -85,7 +85,7 @@ export const updateDuration = async (
   id: string,
   updates: Partial<DurationPayload>
 ): Promise<Duration | null> => {
-  const db = getDB();
+  const db = await getDB();
 
   const fields = Object.keys(updates)
     .map((key) => `${key} = ?`)
@@ -104,7 +104,7 @@ export const updateDuration = async (
 
 // Delete duration
 export const deleteDuration = async (id: string): Promise<void> => {
-  const db = getDB();
+  const db = await getDB();
   await db.runAsync("DELETE FROM duration WHERE id = ?", [id]);
 };
 
@@ -114,7 +114,7 @@ export const filterDurations = async (
   page = 1,
   pageSize = 10
 ): Promise<PaginationResult<Duration>> => {
-  const db = getDB();
+  const db = await getDB();
   const param = `%${keyword}%`;
   const offset = (page - 1) * pageSize;
 

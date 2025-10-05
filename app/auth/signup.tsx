@@ -1,13 +1,13 @@
-import React from 'react'
-import { View, Text, TextInput, Button, ScrollView } from 'react-native'
-import { Controller, useForm } from 'react-hook-form'
-import { z } from 'zod'
+import { FormField } from '@/components/formInput'
+import { signupOffline, SignupPayload } from '@/database/models/auth'
+import useSignup from '@/hooks/auth/useSignup'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import useSignup from '@/hooks/auth/useSignup'
+import React from 'react'
+import { useForm } from 'react-hook-form'
+import { Button, ScrollView, Text, View } from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
-import { FormField } from '@/components/formInput'
+import { z } from 'zod'
 
 const Signup = () => {
     const formSchema = z
@@ -56,33 +56,21 @@ const Signup = () => {
     const router = useRouter()
 
     const submitForm = async (values: z.infer<typeof formSchema>) => {
-        const payload = {
+        const payload: SignupPayload = {
             name: values.name,
             email: values.email,
-            phone_number_input: values.phone_number_input,
+            // phone_number_input: values.phone_number_input,
             password: values.password,
-            subscription_plan: localSearchParams['subscription_plan']!,
+            // subscription_plan: localSearchParams['subscription_plan']!,
             phone_number: '',
+            mode: "offline"
         }
 
-        console.log('localSearchParams', localSearchParams['subscription_plan'])
-
-        if (localSearchParams['subscription_plan'] === 'gratis') {
-            try {
-                await AsyncStorage.setItem(
-                    'signupData',
-                    JSON.stringify(payload)
-                )
-                router.push('/auth/choosePlan')
-            } catch (e) {
-                console.log('error', e)
-            }
-        } else {
-            signup({
-                ...payload,
-                subscription_plan: localSearchParams['subscription_plan'][0],
-            })
-        }
+      const resp = await signupOffline(payload);
+      console.log(resp);
+      router.push('/auth/login');
+      return
+      
     }
 
     return (

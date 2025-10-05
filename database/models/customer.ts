@@ -1,5 +1,6 @@
 import { randomUUID } from "expo-crypto";
 import { getDB } from "../utils/db";
+import { getActiveSession } from "./auth";
 
 export type Customer = {
   id: string;
@@ -29,7 +30,10 @@ type PaginationResult<T> = {
 };
 
 export const addCustomer = async (customer: CustomerPayload) => {
-  const db = getDB();
+  const session = await getActiveSession();
+  if (!session) throw new Error("You must be logged in to add customers.");
+
+  const db = await getDB();
   const id = randomUUID();
   const created_at = new Date().toISOString();
 
@@ -55,7 +59,7 @@ export const getCustomers = async (
   page = 1,
   pageSize = 10
 ): Promise<PaginationResult<Customer>> => {
-  const db = getDB();
+  const db = await getDB();
   const offset = (page - 1) * pageSize;
 
   const data = await db.getAllAsync<Customer>(
@@ -76,7 +80,7 @@ export const getCustomers = async (
 };
 
 export const getCustomerById = async (id: string): Promise<Customer | null> => {
-  const db = getDB();
+  const db = await getDB();
   return await db.getFirstAsync<Customer>(
     "SELECT * FROM customer WHERE id = ?",
     [id]
@@ -87,7 +91,7 @@ export const updateCustomer = async (
   id: string,
   updates: Partial<CustomerPayload>
 ): Promise<Customer | null> => {
-  const db = getDB();
+  const db = await getDB();
   const fields = Object.keys(updates)
     .map((key) => `${key} = ?`)
     .join(", ");
@@ -101,7 +105,7 @@ export const updateCustomer = async (
 };
 
 export const deleteCustomer = async (id: string): Promise<void> => {
-  const db = getDB();
+  const db = await getDB();
   await db.runAsync("DELETE FROM customer WHERE id = ?", [id]);
 };
 
@@ -110,7 +114,7 @@ export const filterCustomers = async (
   page = 1,
   pageSize = 10
 ): Promise<PaginationResult<Customer>> => {
-  const db = getDB();
+  const db = await getDB();
   const param = `%${keyword}%`;
   const offset = (page - 1) * pageSize;
 

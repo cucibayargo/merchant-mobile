@@ -1,3 +1,3 @@
 import * as SQLite from "expo-sqlite";
 
-export const getDB = () => SQLite.openDatabaseSync("app.db");
+export const getDB = () => SQLite.openDatabaseAsync("app.db");
