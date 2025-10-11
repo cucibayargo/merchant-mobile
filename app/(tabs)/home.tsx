@@ -177,7 +177,7 @@ const Home = () => {
             icon: customerIcon,
             isPrimary: true,
             onPress: () => {
-                router.push('/customer ')
+                router.push('/customer')
             },
         },
         {

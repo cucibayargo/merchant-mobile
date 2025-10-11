@@ -9,19 +9,32 @@ export default {
         icon: './assets/images/icon.png',
         scheme: 'cucibayargomobile',
         userInterfaceStyle: 'automatic',
-        newArchEnabled: true,
+        newArchEnabled: false,
         ios: {
             supportsTablet: true,
             bundleIdentifier: 'com.byteik.cucibayargo',
+            "config": {
+                "usesNonExemptEncryption": false
+            }
         },
         android: {
             adaptiveIcon: {
                 foregroundImage: './assets/images/logo.png',
                 backgroundColor: '#ffffff',
             },
-            edgeToEdgeEnabled: true,
+            edgeToEdgeEnabled: false,
             package: 'com.byteik.cucibayargo',
             versionCode: 1,
+            permissions: [
+                'android.permission.BLUETOOTH',
+                'android.permission.BLUETOOTH_ADMIN',
+                'android.permission.BLUETOOTH_CONNECT',
+                'android.permission.BLUETOOTH_SCAN',
+                'android.permission.ACCESS_COARSE_LOCATION',
+                'android.permission.ACCESS_FINE_LOCATION',
+                'android.permission.INTERNET',
+                'android.permission.ACCESS_NETWORK_STATE',
+            ],
         },
         web: {
             bundler: 'metro',
@@ -42,6 +55,21 @@ export default {
             'expo-font',
             'expo-web-browser',
             'expo-localization',
+            [
+                'react-native-ble-plx',
+                {
+                    isBackgroundEnabled: true,
+                    modes: ['peripheral', 'central'],
+                    bluetoothAlwaysPermission: 'Allow $(PRODUCT_NAME) to connect to bluetooth devices',
+                },
+            ],
+            [
+                "expo-secure-store",
+                {
+                  "configureAndroidBackup": true,
+                  "faceIDPermission": "Allow $(PRODUCT_NAME) to access your Face ID biometric data."
+                }
+            ]
         ],
         experiments: {
             typedRoutes: true,
