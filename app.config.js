@@ -2,8 +2,8 @@ import 'dotenv/config'
 
 export default {
     expo: {
-        name: 'cucibayargo-mobile',
-        slug: 'cucibayargo-mobile',
+        name: 'pos',
+        slug: 'pos',
         version: '1.0.0',
         orientation: 'portrait',
         icon: './assets/images/icon.png',
@@ -49,7 +49,7 @@ export default {
         extra: {
             API_URL: process.env.API_URL,
             eas: {
-                projectId: '45a379d1-8bdf-413f-927c-785e4a15d0a1',
+                projectId: 'b782ca64-b8a1-46e1-9cdf-acc37ee96811',
             },
         },
     },

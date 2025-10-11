@@ -23,7 +23,7 @@ const useLogin = () => {
             router.push('/(tabs)/home')
         },
         onError: (error) => {
-            console.log(error)
+            // console.log(error)
         },
     })
 }

@@ -203,6 +203,16 @@ const Home = () => {
             },
         },
         {
+            id: 'printer',
+            title: 'Printer',
+            badge: '30MINS',
+            icon: noteIcon,
+            isPrimary: false,
+            onPress: () => {
+                router.push('/settings/printer')
+            },
+        },
+        {
             id: 'more',
             title: 'Lainnya',
             icon: moreIcon,
