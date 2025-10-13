@@ -331,3 +331,4 @@ $$ LANGUAGE plpgsql;
 5. **Pagination**: Implement pagination for printer lists
 
 This schema provides a robust foundation for managing printer configurations in the backend while maintaining data integrity and performance.
+

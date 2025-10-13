@@ -129,3 +129,4 @@ The app logs detailed information to the console for debugging:
 - Receipt template management
 - Print queue functionality
 - Cloud printer support
+
