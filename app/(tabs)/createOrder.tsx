@@ -371,7 +371,7 @@ const CreateOrder = () => {
                     setShowCustomerDrawer(false)
                     setFilter('') // Clear filter when closing
                 }}
-                height={600}
+                height={880}
             >
                 <CustomerSelection
                     onCustomerSelect={(customer: ICustomer) => {
@@ -398,7 +398,7 @@ const CreateOrder = () => {
                     setShowServiceDrawer(false)
                     setServiceFilter('') // Clear filter when closing
                 }}
-                height={800}
+                height={880}
             >
                 <ServiceSelection
                     onSaveServices={(selectedServices) => {

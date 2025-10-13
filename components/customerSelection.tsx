@@ -116,14 +116,14 @@ const CustomerSelection: React.FC<CustomerSelectionProps> = ({
     )
 
     return (
-        <View style={{}}>
+        <View>
             <CustomSearchBar
                 placeholder="Cari nama atau nomor telepon..."
                 query={localFilter}
                 onSearch={setLocalFilter}
             />
 
-            <View style={{ marginTop: 16, maxHeight: 480 }}>
+            <View style={{ marginTop: 16, maxHeight: 550 }}>
                 {isLoading ? (
                     <LoadingState />
                 ) : (
@@ -137,7 +137,6 @@ const CustomerSelection: React.FC<CustomerSelectionProps> = ({
                         showsVerticalScrollIndicator={true}
                         onRefresh={onRefresh}
                         refreshing={isLoading}
-                        contentContainerStyle={{ paddingBottom: 140 }}
                     />
                 )}
             </View>

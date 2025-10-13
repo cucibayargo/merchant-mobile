@@ -252,14 +252,14 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({
     const selectedCount = Object.keys(selectedServices).length
 
     return (
-        <View style={{ height: 668 }}>
+        <View>
             <CustomSearchBar
                 placeholder="Cari nama layanan..."
                 query={localFilter}
                 onSearch={setLocalFilter}
             />
 
-            <View style={{ marginTop: 16, height: 520 }}>
+            <View style={{ marginTop: 16, height: 530 }}>
                 {isLoading ? (
                     <LoadingState />
                 ) : (
@@ -273,7 +273,6 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({
                         showsVerticalScrollIndicator={true}
                         onRefresh={onRefresh}
                         refreshing={isLoading}
-                        contentContainerStyle={{ paddingBottom: 100 }}
                     />
                 )}
             </View>
