@@ -19,8 +19,7 @@ const useLogin = () => {
             return await axiosInstance.post(url, paylod)
         },
         onSuccess: (data) => {
-            console.log('data', data)
-            SecureStore.setItem('isLoggedIn', 'true')
+            SecureStore.setItem('authToken', data.data.token)
             getUserDetails()
             router.push('/(tabs)/home')
         },

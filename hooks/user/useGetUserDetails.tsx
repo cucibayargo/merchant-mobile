@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import axiosInstance from '@/libs/axios'
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as SecureStore from 'expo-secure-store'
 import { useUser } from '@/context/user'
 
 const useGetUserDetails = () => {
@@ -10,8 +10,7 @@ const useGetUserDetails = () => {
     return useMutation({
         mutationKey: ['userDetails'],
         mutationFn: async () => axiosInstance.get(url),
-        onSuccess: async (data) => {
-            await AsyncStorage.setItem('userDetails', JSON.stringify(data.data))
+        onSuccess: (data) => {
             setUser(data.data)
         },
     })

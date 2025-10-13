@@ -52,6 +52,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import Constants from 'expo-constants'
 import { BottomDrawer } from '@/components/bottomDrawer'
 import { AboutApp } from '@/components/aboutApp'
+import * as SecureStore from 'expo-secure-store'
 
 type Service = {
     id: string
@@ -187,7 +188,6 @@ const Home = () => {
             icon: reportIcon,
             isPrimary: true,
             onPress: () => {
-                // open()
                 setIsReportFilterOpen(true)
                 console.log('report')
             },
@@ -320,10 +320,10 @@ const Home = () => {
 
     const clear = () => setReportDate({})
 
-    const downloadReport = async (): void => {
+    const downloadReport = async () => {
         const url = `${Constants.expoConfig?.extra?.API_URL}/report/download?start_date=${
             reportDate.start
-        }&end_date=${reportDate.end}`
+        }&end_date=${reportDate.end}&auth_token=${SecureStore.getItem('authToken')}`
         const supported = await Linking.canOpenURL(url)
 
         if (supported) {
