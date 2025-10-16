@@ -1,4 +1,4 @@
-import { IServiceDetail } from '@/types/service'
+import { IServiceOrder } from '@/types/createOrder'
 import { Minus, Plus, Search } from 'lucide-react-native'
 import React, { useEffect, useState } from 'react'
 import {
@@ -13,9 +13,9 @@ import CustomSearchBar from './customSearchBar'
 
 interface ServiceSelectionProps {
     onSaveServices: (selectedServices: {
-        [key: string]: { service: IServiceDetail; quantity: number }
+        [key: string]: { service: IServiceOrder; quantity: number }
     }) => void
-    services: IServiceDetail[]
+    services: IServiceOrder[]
     isLoading: boolean
     onRefresh: () => void
     filter: string
@@ -34,19 +34,22 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({
 }) => {
     const [localFilter, setLocalFilter] = useState(filter)
     const [selectedServices, setSelectedServices] = useState<{
-        [key: string]: { service: IServiceDetail; quantity: number }
+        [key: string]: { service: IServiceOrder; quantity: number }
     }>({})
 
     // Initialize selected services with current order services
     useEffect(() => {
         const initialServices: {
-            [key: string]: { service: IServiceDetail; quantity: number }
+            [key: string]: { service: IServiceOrder; quantity: number }
         } = {}
 
         // Map current order services to selected services
         Object.entries(currentOrderServices).forEach(
             ([serviceId, quantity]) => {
-                const service = services.find((s) => s.id === serviceId)
+                const service = services.find(
+                    (s) => `${s.id}-${s.duration_id}` === serviceId
+                )
+
                 if (service) {
                     initialServices[serviceId] = { service, quantity }
                 }
@@ -70,25 +73,34 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({
         setLocalFilter(filter)
     }, [filter])
 
-    const handleQuantityChange = (serviceId: string, newQuantity: number) => {
+    const handleQuantityChange = (
+        serviceId: string,
+        durationId: string,
+        newQuantity: number
+    ) => {
         if (newQuantity < 0) return
 
         // Find the service to get its details
-        const service = services.find((s) => s.id === serviceId)
+        const service = services.find(
+            (s) => s.id === serviceId && s.duration_id === durationId
+        )
         if (!service) return
 
         if (newQuantity === 0) {
             // Remove service if quantity is 0
             setSelectedServices((prev) => {
                 const newState = { ...prev }
-                delete newState[serviceId]
+                delete newState[`${serviceId}-${durationId}`]
                 return newState
             })
         } else {
             // Add or update service
             setSelectedServices((prev) => ({
                 ...prev,
-                [serviceId]: { service, quantity: newQuantity },
+                [`${serviceId}-${durationId}`]: {
+                    service,
+                    quantity: newQuantity,
+                },
             }))
         }
     }
@@ -98,8 +110,10 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({
         setSelectedServices({})
     }
 
-    const ServiceCard = ({ service }: { service: IServiceDetail }) => {
-        const quantity = selectedServices[service.id]?.quantity || 0
+    const ServiceCard = ({ service }: { service: IServiceOrder }) => {
+        const quantity =
+            selectedServices[`${service.id}-${service.duration_id}`]
+                ?.quantity || 0
 
         return (
             <Pressable
@@ -127,7 +141,7 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({
                                 marginBottom: 4,
                             }}
                         >
-                            {service.name}
+                            {service.name} [{service.duration_name}]
                         </Text>
                         <Text style={{ color: '#6B7280', fontSize: 14 }}>
                             Satuan: {service.unit}
@@ -163,6 +177,7 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({
                                     onPress={() =>
                                         handleQuantityChange(
                                             service.id,
+                                            service.duration_id,
                                             quantity - 1
                                         )
                                     }
@@ -183,7 +198,11 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({
                                     value={quantity.toString()}
                                     onChangeText={(text) => {
                                         const num = parseInt(text) || 0
-                                        handleQuantityChange(service.id, num)
+                                        handleQuantityChange(
+                                            service.id,
+                                            service.duration_id,
+                                            num
+                                        )
                                     }}
                                     style={{
                                         borderWidth: 1,
@@ -205,6 +224,7 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({
                                     onPress={() =>
                                         handleQuantityChange(
                                             service.id,
+                                            service.duration_id,
                                             quantity + 1
                                         )
                                     }
@@ -268,7 +288,9 @@ const ServiceSelection: React.FC<ServiceSelectionProps> = ({
                         renderItem={({ item }) => (
                             <ServiceCard service={item} />
                         )}
-                        keyExtractor={(item) => item.id}
+                        keyExtractor={(item) =>
+                            `${item.id}-${item.duration_id}`
+                        }
                         ListEmptyComponent={EmptyState}
                         showsVerticalScrollIndicator={true}
                         onRefresh={onRefresh}

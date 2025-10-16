@@ -1,4 +1,4 @@
-import { IOrderService } from '@/types/order'
+import { IServiceOrder } from '@/types/createOrder'
 import React, { createContext, ReactNode, useContext, useState } from 'react'
 
 export interface ICreateOrderData {
@@ -9,7 +9,7 @@ export interface ICreateOrderData {
     duration_id: string
     duration_name: string
     note: string
-    services: IOrderService[]
+    services: IServiceOrder[]
     estimated_date: string
     payment_status: string
 }
@@ -24,7 +24,7 @@ export interface ICreateOrderContext {
         address: string
     }) => void
     updateDuration: (duration: { id: string; name: string }) => void
-    addService: (service: IOrderService) => void
+    addService: (service: IServiceOrder) => void
     removeService: (serviceId: string) => void
     updateServiceQuantity: (serviceId: string, quantity: number) => void
     clearAllServices: () => void
@@ -95,7 +95,7 @@ export const CreateOrderProvider: React.FC<CreateOrderProviderProps> = ({
         }))
     }
 
-    const addService = (service: IOrderService) => {
+    const addService = (service: IServiceOrder) => {
         setOrderData((prev) => ({
             ...prev,
             services: [...prev.services, service],

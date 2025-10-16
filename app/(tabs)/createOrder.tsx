@@ -3,9 +3,9 @@ import CustomerSelection from '@/components/customerSelection'
 import ServiceSelection from '@/components/serviceSelection'
 import { useCreateOrder } from '@/context/createOrder'
 import useGetCustomers from '@/hooks/customer/useGetCustomers'
-import useGetServices from '@/hooks/service/useGetServices'
+import useGetServiceList from '@/hooks/service/useGetServiceList'
+import { IServiceOrder } from '@/types/createOrder'
 import { ICustomer } from '@/types/customer'
-import { IServiceDetail } from '@/types/service'
 import { useFocusEffect } from '@react-navigation/native'
 import { Edit, MapPin, Pencil, Phone, Plus, User2 } from 'lucide-react-native'
 import React, { useEffect, useState } from 'react'
@@ -28,7 +28,7 @@ const CreateOrder = () => {
     const [filter, setFilter] = useState('')
     const [serviceFilter, setServiceFilter] = useState('')
     const [customers, setCustomers] = useState<ICustomer[]>([])
-    const [services, setServices] = useState<IServiceDetail[]>([])
+    const [services, setServices] = useState<IServiceOrder[]>([])
 
     const { data, isLoading, refetch } = useGetCustomers({
         filter,
@@ -40,7 +40,7 @@ const CreateOrder = () => {
         data: serviceData,
         isLoading: isServiceLoading,
         refetch: refetchServices,
-    } = useGetServices({
+    } = useGetServiceList({
         filter: serviceFilter,
         limit: 20,
         page: 1,
@@ -53,8 +53,8 @@ const CreateOrder = () => {
     }, [data])
 
     useEffect(() => {
-        if (serviceData?.data?.services) {
-            setServices(serviceData.data.services)
+        if (serviceData?.data) {
+            setServices(serviceData.data)
         }
     }, [serviceData])
 
@@ -166,7 +166,7 @@ const CreateOrder = () => {
                         <>
                             {orderData.services.map((it, idx) => (
                                 <View
-                                    key={`${it.service_name}-${idx}`}
+                                    key={it.id}
                                     style={{
                                         flexDirection: 'row',
                                         justifyContent: 'space-between',
@@ -186,7 +186,7 @@ const CreateOrder = () => {
                                                 fontWeight: '700',
                                             }}
                                         >
-                                            {it.service_name}
+                                            {it.name}
                                         </Text>
                                         <Text
                                             style={{
@@ -194,8 +194,7 @@ const CreateOrder = () => {
                                                 marginTop: 2,
                                             }}
                                         >
-                                            {orderData.duration_name ||
-                                                'No duration'}{' '}
+                                            {it.duration_name || 'No duration'}{' '}
                                             x Rp{' '}
                                             {it.price.toLocaleString('id-ID')}
                                         </Text>
@@ -210,7 +209,7 @@ const CreateOrder = () => {
                                                 fontWeight: '700',
                                             }}
                                         >
-                                            {it.quantity} {it.service_unit}
+                                            {it.quantity} {it.unit}
                                         </Text>
                                         <Text style={{ marginTop: 4 }}>
                                             Rp{' '}
@@ -408,14 +407,14 @@ const CreateOrder = () => {
                         // Add all selected services
                         Object.values(selectedServices).forEach(
                             ({ service, quantity }) => {
-                                const price = service.durations?.[0]?.price || 0
-
                                 addService({
-                                    service_id: service.id,
-                                    service_name: service.name,
-                                    service_unit: service.unit,
-                                    price: price,
+                                    id: service.id,
+                                    name: service.name,
+                                    unit: service.unit,
+                                    price: service.price,
                                     quantity: quantity,
+                                    duration_id: service.duration_id,
+                                    duration_name: service.duration_name,
                                 })
                             }
                         )
@@ -429,7 +428,8 @@ const CreateOrder = () => {
                     onFilterChange={setServiceFilter}
                     currentOrderServices={orderData.services.reduce(
                         (acc, service) => {
-                            acc[service.service_id] = service.quantity
+                            acc[`${service.id}-${service.duration_id}`] =
+                                service.quantity
                             return acc
                         },
                         {} as { [key: string]: number }
