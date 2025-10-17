@@ -19,9 +19,9 @@ const useLogin = () => {
             return await axiosInstance.post(url, paylod)
         },
         onSuccess: (data) => {
-            SecureStore.setItem('authToken', data.data.token)
+            SecureStore.setItemAsync('authToken', data.data.token)
             getUserDetails()
-            router.push('/(tabs)/home')
+            // Navigation will be handled automatically by _layout.tsx
         },
         onError: (error) => {
             // console.log(error)

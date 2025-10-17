@@ -4,8 +4,9 @@ import { format } from 'date-fns'
 import { id } from 'date-fns/locale'
 import { useRouter } from 'expo-router'
 import { CalendarDaysIcon, ThumbsDown, ThumbsUp } from 'lucide-react-native'
-import React, { memo } from 'react'
-import { Pressable, Text, View } from 'react-native'
+import { memo } from 'react'
+import { Pressable, View } from 'react-native'
+import { Text } from 'react-native-paper'
 
 type Navigation = StackNavigationProp<RootStackParamList, 'Main'>
 

@@ -5,17 +5,16 @@ import useGetServices from '@/hooks/service/useGetServices'
 import { IService } from '@/types/service'
 import { useRouter } from 'expo-router'
 import { Trash2 } from 'lucide-react-native'
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import {
     ActivityIndicator,
     Alert,
     FlatList,
     SafeAreaView,
-    Text,
     TouchableOpacity,
     View,
 } from 'react-native'
-import { Card } from 'react-native-paper'
+import { Card, Text } from 'react-native-paper'
 
 interface IDuration {
     id: string

@@ -1,21 +1,20 @@
 import CustomSearchBar from '@/components/customSearchBar'
 import { BreadcrumbContext } from '@/context/breadcrumb'
+import useDeleteCustomer from '@/hooks/customer/useDeleteCustomer'
+import useGetCustomers from '@/hooks/customer/useGetCustomers'
+import { ICustomer } from '@/types/customer'
 import { useRouter } from 'expo-router'
 import { Trash2 } from 'lucide-react-native'
-import React, { useCallback, useContext, useEffect, useState } from 'react'
+import { useCallback, useContext, useEffect, useState } from 'react'
 import {
     ActivityIndicator,
     Alert,
     FlatList,
     SafeAreaView,
-    Text,
     TouchableOpacity,
     View,
 } from 'react-native'
-import { Card } from 'react-native-paper'
-import useDeleteCustomer from '@/hooks/customer/useDeleteCustomer'
-import useGetCustomers from '@/hooks/customer/useGetCustomers'
-import { ICustomer } from '@/types/customer'
+import { Card, Text } from 'react-native-paper'
 
 export default function CustomerIndex() {
     const { setTitle, setShowBackIcon, setPrevPath, setShowTitle } =

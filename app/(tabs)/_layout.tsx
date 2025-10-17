@@ -1,6 +1,5 @@
 import { Tabs, useRouter } from 'expo-router'
 import { ClipboardPlus, House, ScrollText, User } from 'lucide-react-native'
-import React from 'react'
 
 const MainTabNavigator = () => {
     const router = useRouter()
@@ -11,7 +10,7 @@ const MainTabNavigator = () => {
                 tabBarIcon: ({ focused, color, size }) => {
                     let icon
 
-                    if (route.name === 'home') {
+                    if (route.name === 'index') {
                         icon = focused ? (
                             <House size={size} color={color} />
                         ) : (
@@ -55,7 +54,7 @@ const MainTabNavigator = () => {
             })}
         >
             <Tabs.Screen
-                name="home"
+                name="index"
                 options={{
                     title: 'Beranda',
                     headerShown: false,

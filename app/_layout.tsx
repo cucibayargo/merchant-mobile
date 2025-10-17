@@ -1,30 +1,69 @@
 import { CreateOrderProvider } from '@/context/createOrder'
-import { UserProvider } from '@/context/user'
+import { UserProvider, useUser } from '@/context/user'
+import useAuth from '@/hooks/auth/useAuth'
 import { QueryClient } from '@tanstack/query-core'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { router, Slot, Stack, useSegments } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { useEffect } from 'react'
+import { Text, TextInput } from 'react-native'
 import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { DefaultTheme, PaperProvider } from 'react-native-paper'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import './globals.css'
 
-function useSession() {
-    // session: null (signed out) | object (signed in)
-    // isLoaded: true when you've read from SecureStore/AsyncStorage or finished bootstrap
-    return { session: null, isLoaded: true }
+// Set default text color globally for React Native components
+Text.defaultProps = {
+    ...Text.defaultProps,
+    style: {
+        color: '#181718',
+    },
+}
+
+TextInput.defaultProps = {
+    ...TextInput.defaultProps,
+    style: {
+        color: '#181718',
+    },
+}
+
+function RootLayoutNav() {
+    const { isAuthenticated, isLoading } = useUser()
+    const segments = useSegments()
+
+    // Initialize authentication check
+    useAuth()
+
+    useEffect(() => {
+        if (isLoading) return
+
+        const inAuthGroup = segments[0] === 'auth'
+
+        if (!isAuthenticated && !inAuthGroup) {
+            // User is not authenticated and not in auth group, redirect to login
+            router.replace('/auth/login')
+        } else if (isAuthenticated && inAuthGroup) {
+            // User is authenticated but in auth group, redirect to home
+            router.replace('/(tabs)')
+        }
+    }, [isAuthenticated, isLoading, segments])
+
+    useEffect(() => {
+        if (!isLoading) {
+            SplashScreen.hideAsync()
+        }
+    }, [isLoading])
+
+    return (
+        <Stack screenOptions={{ headerShown: false }}>
+            <Slot />
+        </Stack>
+    )
 }
 
 SplashScreen.preventAutoHideAsync() // keep splash while deciding
 
 export default function RootLayout() {
-    // const jwtTokenErrors: string[] = [
-    //     'Akses ditolak. Token tidak sesuai',
-    //     'Token tidak ditemukan',
-    //     'Langganan Anda telah kedaluwarsa. Silakan perbarui langganan Anda atau hubungi administrator.',
-    // ]
-
     const queryClient = new QueryClient({
         defaultOptions: {
             queries: {
@@ -44,19 +83,15 @@ export default function RootLayout() {
             primary: '#6200ee', // you can customize
             background: '#ffffff',
             surface: '#ffffff',
-            text: '#000000',
+            text: '#181718', // Default text color
             placeholder: '#999999',
+            onSurface: '#181718', // Text color on surfaces
+            onBackground: '#181718', // Text color on background
+            onSurfaceVariant: '#181718', // Text color for surface variants
+            outline: '#181718', // Outline color
+            outlineVariant: '#181718', // Outline variant color
         },
     }
-
-    const { session, isLoaded } = useSession()
-    const segments = useSegments()
-
-    useEffect(() => {
-        if (!isLoaded) return
-
-        router.replace('/auth/login')
-    }, [isLoaded, session, segments])
 
     return (
         <GestureHandlerRootView style={{ flex: 1 }}>
@@ -65,23 +100,7 @@ export default function RootLayout() {
                     <QueryClientProvider client={queryClient}>
                         <UserProvider>
                             <CreateOrderProvider>
-                                <Stack screenOptions={{ headerShown: false }}>
-                                    <Slot />
-                                    {/* <Stack.Screen
-                                        name="auth/login"
-                                        options={{ headerShown: false }}
-                                    />
-                                    <Stack.Screen
-                                        name="auth/signup"
-                                        options={{ headerShown: false }}
-                                    />
-                                    <Stack.Screen
-                                        name="auth/choosePlan"
-                                        options={{ headerShown: false }}
-                                    />
-                                    <Stack.Screen name="(tabs)" />
-                                    <Stack.Screen name="changePassword" /> */}
-                                </Stack>
+                                <RootLayoutNav />
                             </CreateOrderProvider>
                         </UserProvider>
                     </QueryClientProvider>
