@@ -1,9 +1,8 @@
 import axios from 'axios'
-import Constants from 'expo-constants'
 // import { API_URL } from '@env'
 
 const axiosInstance = axios.create({
-    baseURL: Constants.expoConfig?.extra?.API_URL,
+    baseURL: process.env.EXPO_PUBLIC_API_URL,
     withCredentials: true,
 })
 
