@@ -57,7 +57,6 @@ const OrderDetail = () => {
     useEffect(() => {
         if (orderResponse) {
             setOrder(orderResponse.data)
-            console.log(orderResponse.data)
         }
     }, [orderResponse])
 

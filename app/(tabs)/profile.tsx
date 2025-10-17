@@ -1,23 +1,23 @@
-import React, { useEffect, useState } from 'react'
+import { FormField } from '@/components/formInput'
+import { useUser } from '@/context/user'
+import useUploadLogo from '@/hooks/profile/useUploadLogo'
+import useUpdateUser from '@/hooks/user/useUpdateUser'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as ImagePicker from 'expo-image-picker'
+import { useRouter } from 'expo-router'
+import { useEffect, useState } from 'react'
+import { useForm } from 'react-hook-form'
 import {
-    StyleSheet,
-    ScrollView,
+    Alert,
     Image,
     KeyboardAvoidingView,
     Platform,
-    Alert,
+    ScrollView,
+    StyleSheet,
 } from 'react-native'
-import { Text, Button } from 'react-native-paper'
-import { useUser } from '@/context/user'
-import * as ImagePicker from 'expo-image-picker'
-import useUploadLogo from '@/hooks/profile/useUploadLogo'
 import Spinner from 'react-native-loading-spinner-overlay'
-import useUpdateUser from '@/hooks/user/useUpdateUser'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
+import { Button, Text } from 'react-native-paper'
 import { z } from 'zod'
-import { FormField } from '@/components/formInput'
-import { useRouter } from 'expo-router'
 
 const Profile = () => {
     const { user } = useUser()
@@ -58,12 +58,6 @@ const Profile = () => {
         }
     }, [user])
 
-    useEffect(() => {
-        if (isSuccess) {
-            console.log('success upload image')
-        }
-    }, [isSuccess])
-
     const requestAndroidGalleryPermission = async () => {
         if (Platform.OS !== 'android') return true
 
@@ -89,7 +83,6 @@ const Profile = () => {
 
     const handlePickLogo = async () => {
         if (Platform.OS === 'android') {
-            console.log('android')
             const file: any = await requestAndroidGalleryPermission()
             if (!file) {
                 Alert.alert(

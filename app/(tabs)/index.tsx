@@ -1,12 +1,12 @@
+import aboutIcon from '@/assets/images/about-icon.png'
 import customerIcon from '@/assets/images/customer-icon.png'
 import durationIcon from '@/assets/images/duration-icon.png'
+import faqIcon from '@/assets/images/faq-icon.png'
 import moreIcon from '@/assets/images/more-icon.png'
 import noteIcon from '@/assets/images/note-icon.png'
 import reportIcon from '@/assets/images/report-icon.png'
 import serviceIcon from '@/assets/images/service-icon.png'
-import faqIcon from '@/assets/images/faq-icon.png'
 import supportIcon from '@/assets/images/support-icon.png'
-import aboutIcon from '@/assets/images/about-icon.png'
 import OrderCard from '@/components/orderCard'
 import { useUser } from '@/context/user'
 import useGetOrders from '@/hooks/order/useGetOrders'
@@ -15,44 +15,38 @@ import { useRouter } from 'expo-router'
 import { Clock10, Shapes, Users } from 'lucide-react-native'
 import React, { useCallback, useEffect, useState } from 'react'
 import {
+    Alert,
     FlatList,
     Image,
+    Linking,
+    Modal,
     Platform,
     StyleSheet,
     View,
-    Modal,
-    Linking,
-    Alert,
 } from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
 import {
     Avatar,
+    Button,
     Card,
     Divider,
-    // Modal,
-    Portal,
     Text,
     TouchableRipple,
-    Button,
 } from 'react-native-paper'
 // import DateTimePicker, {
 //     DateType,
 //     useDefaultStyles,
 // } from 'react-native-ui-datepicker'
-import {
-    DatePickerModal,
-    id,
-    registerTranslation,
-} from 'react-native-paper-dates'
+import { AboutApp } from '@/components/aboutApp'
+import { BottomDrawer } from '@/components/bottomDrawer'
 import DateTimePicker, {
     DateTimePickerEvent,
 } from '@react-native-community/datetimepicker'
-import { getLocales } from 'expo-localization'
-import { SafeAreaView } from 'react-native-safe-area-context'
 import Constants from 'expo-constants'
-import { BottomDrawer } from '@/components/bottomDrawer'
-import { AboutApp } from '@/components/aboutApp'
+import { getLocales } from 'expo-localization'
 import * as SecureStore from 'expo-secure-store'
+import { id, registerTranslation } from 'react-native-paper-dates'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 type Service = {
     id: string
@@ -189,7 +183,6 @@ const Home = () => {
             isPrimary: true,
             onPress: () => {
                 setIsReportFilterOpen(true)
-                console.log('report')
             },
         },
         {
@@ -281,7 +274,6 @@ const Home = () => {
     }, [data])
 
     const close = useCallback(() => {
-        console.log('close')
         setShowStart(false)
         setShowEnd(false)
         setIsReportFilterOpen(false)

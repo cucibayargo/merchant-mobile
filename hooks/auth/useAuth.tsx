@@ -21,7 +21,7 @@ const useAuth = () => {
                     }
                 }
             } catch (error) {
-                console.log('Error checking auth token:', error)
+                console.error('Error checking auth token:', error)
             } finally {
                 setIsLoading(false)
             }
@@ -32,4 +32,3 @@ const useAuth = () => {
 }
 
 export default useAuth
-

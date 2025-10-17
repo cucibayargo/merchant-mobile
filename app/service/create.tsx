@@ -1,19 +1,17 @@
 import { FormField } from '@/components/formInput'
+import useGetDurationList from '@/hooks/duration/useGetDurationList'
+import useCreateService from '@/hooks/service/useCreateService'
+import useGetService from '@/hooks/service/useGetService'
+import { IDurationFormData } from '@/types/service'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useLocalSearchParams, useRouter } from 'expo-router'
-import React, { useEffect, useState } from 'react'
+import { useLocalSearchParams } from 'expo-router'
+import { Pencil, Plus, Trash2 } from 'lucide-react-native'
+import { useEffect, useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { FlatList, SafeAreaView, TouchableOpacity, View } from 'react-native'
 import Spinner from 'react-native-loading-spinner-overlay'
-import { Button, Portal, Dialog } from 'react-native-paper'
+import { Button, Dialog, Portal, Text } from 'react-native-paper'
 import { z } from 'zod'
-import useGetService from '@/hooks/service/useGetService'
-import { Text } from 'react-native-paper'
-import { Trash2, Pencil, Plus } from 'lucide-react-native'
-import { IDurationFormData } from '@/types/service'
-import useGetDurationList from '@/hooks/duration/useGetDurationList'
-import useUpdateService from '@/hooks/service/useUpdateService'
-import useCreateService from '@/hooks/service/useCreateService'
 
 const DurationModal = ({
     visible,
@@ -45,7 +43,6 @@ const DurationModal = ({
     useEffect(() => {
         if (data) {
             reset(data)
-            console.log(data)
         }
     }, [data])
 
@@ -153,7 +150,6 @@ export default function CreateService() {
             duration: duration.duration_id,
             price: duration.price,
         }))
-        console.log(payload)
 
         createService(payload)
     }

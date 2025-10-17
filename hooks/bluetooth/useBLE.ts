@@ -98,7 +98,7 @@ function useBLE(): BluetoothLowEnergyApi {
         setAllDevices([]) // Clear previous devices
         bleManager.startDeviceScan(null, null, (error: any, device: any) => {
             if (error) {
-                console.log(error)
+                console.error(error)
                 setIsScanning(false)
             }
             if (device && (device.name || device.localName)) {

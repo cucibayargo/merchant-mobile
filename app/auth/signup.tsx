@@ -1,13 +1,12 @@
-import React from 'react'
-import { View, Text, TextInput, Button, ScrollView } from 'react-native'
-import { Controller, useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useLocalSearchParams, useRouter } from 'expo-router'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import useSignup from '@/hooks/auth/useSignup'
-import Spinner from 'react-native-loading-spinner-overlay'
 import { FormField } from '@/components/formInput'
+import useSignup from '@/hooks/auth/useSignup'
+import { zodResolver } from '@hookform/resolvers/zod'
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useForm } from 'react-hook-form'
+import { Button, ScrollView, Text, View } from 'react-native'
+import Spinner from 'react-native-loading-spinner-overlay'
+import { z } from 'zod'
 
 const Signup = () => {
     const formSchema = z
@@ -65,8 +64,6 @@ const Signup = () => {
             phone_number: '',
         }
 
-        console.log('localSearchParams', localSearchParams['subscription_plan'])
-
         if (localSearchParams['subscription_plan'] === 'gratis') {
             try {
                 await AsyncStorage.setItem(
@@ -75,7 +72,7 @@ const Signup = () => {
                 )
                 router.push('/auth/choosePlan')
             } catch (e) {
-                console.log('error', e)
+                console.error('error', e)
             }
         } else {
             signup({

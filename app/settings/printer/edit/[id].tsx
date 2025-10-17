@@ -1,22 +1,22 @@
-import React, { useState, useEffect } from 'react'
-import {
-    View,
-    Text,
-    ScrollView,
-    TouchableOpacity,
-    Alert,
-    ActivityIndicator,
-    TextInput,
-    StyleSheet,
-} from 'react-native'
 import { router, useLocalSearchParams } from 'expo-router'
 import {
-    PrinterIcon,
     ArrowLeftIcon,
-    SettingsIcon,
+    PrinterIcon,
     SaveIcon,
+    SettingsIcon,
     TestTubeIcon,
 } from 'lucide-react-native'
+import { useEffect, useState } from 'react'
+import {
+    ActivityIndicator,
+    Alert,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native'
 import { usePrinterConfig } from '../../../../hooks/printer/usePrinterConfig'
 import { PrinterSettings } from '../../../../types/printer'
 import {
@@ -426,8 +426,6 @@ export default function EditPrinter() {
             // Create test print command
             const testPrintCommand = PrinterCommandBuilder.createTestPrint()
             const printData = stringToBytes(testPrintCommand)
-
-            console.log('Sending print command:', printData)
 
             // Simulate print delay
             await new Promise((resolve) => setTimeout(resolve, 2000))

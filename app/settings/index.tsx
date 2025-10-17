@@ -1,13 +1,12 @@
-import React from 'react'
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native'
 import { router } from 'expo-router'
 import {
-    PrinterIcon,
-    UserIcon,
     BellIcon,
-    ShieldIcon,
     HelpCircleIcon,
+    PrinterIcon,
+    ShieldIcon,
+    UserIcon,
 } from 'lucide-react-native'
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native'
 
 const SettingIndex = () => {
     const settingsItems = [
@@ -23,28 +22,24 @@ const SettingIndex = () => {
             title: 'Profile Settings',
             description: 'Manage your account information',
             icon: <UserIcon size={24} color="#6B7280" />,
-            onPress: () => console.log('Profile settings'),
         },
         {
             id: 'notifications',
             title: 'Notifications',
             description: 'Configure notification preferences',
             icon: <BellIcon size={24} color="#6B7280" />,
-            onPress: () => console.log('Notifications'),
         },
         {
             id: 'security',
             title: 'Security & Privacy',
             description: 'Manage security settings',
             icon: <ShieldIcon size={24} color="#6B7280" />,
-            onPress: () => console.log('Security'),
         },
         {
             id: 'help',
             title: 'Help & Support',
             description: 'Get help and contact support',
             icon: <HelpCircleIcon size={24} color="#6B7280" />,
-            onPress: () => console.log('Help'),
         },
     ]
 

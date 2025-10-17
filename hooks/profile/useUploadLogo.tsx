@@ -1,5 +1,5 @@
-import { useMutation } from '@tanstack/react-query'
 import axiosInstance from '@/libs/axios'
+import { useMutation } from '@tanstack/react-query'
 
 const useUploadLogo = () => {
     const url: string = '/user/upload-logo'
@@ -16,7 +16,6 @@ const useUploadLogo = () => {
             // return `data:${mime};base64,${base64}`
             const formData = new FormData()
             formData.append('file', file)
-            // console.log(file)
 
             return axiosInstance.post(url, formData, {
                 headers: { 'content-type': 'multipart/form-data' },
@@ -30,7 +29,7 @@ const useUploadLogo = () => {
             // })
         },
         onError: (e) => {
-            console.log('error upload image', e.message)
+            console.error('error upload image', e.message)
         },
     })
 }

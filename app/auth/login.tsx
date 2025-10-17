@@ -53,7 +53,6 @@ const Login = () => {
     // Authentication redirect is now handled in _layout.tsx
 
     const onSubmit = (data: z.infer<typeof formSchema>) => {
-        console.log('data', data)
         login(data)
     }
 

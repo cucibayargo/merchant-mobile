@@ -33,7 +33,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
             await SecureStore.deleteItemAsync('authToken')
             setUser(null)
         } catch (error) {
-            console.log('Error during logout:', error)
+            console.error('Error during logout:', error)
         }
     }
 
