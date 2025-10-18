@@ -1,5 +1,4 @@
 import * as Crypto from "expo-crypto";
-import { randomUUID } from "expo-crypto";
 import { getDB } from "../utils/db";
 
 export type User = {
@@ -7,7 +6,7 @@ export type User = {
   name: string;
   email: string;
   password_hash: string;
-  phone_number?: string | null;
+  phone_number: string;
   created_at: string;
 };
 
@@ -15,7 +14,7 @@ export type SignupPayload = {
   name: string;
   email: string;
   password: string;
-  phone_number?: string | null;
+  phone_number: string;
   mode: "offline" | "online";
 };
 
@@ -39,29 +38,22 @@ export const signupOffline = async (payload: SignupPayload) => {
       console.warn("Email already registered:", payload.email);
       throw new Error("Email already registered. Please log in instead.");
     }
-
-    const id = randomUUID();
-    const created_at = new Date().toISOString();
-
     const passwordHash = await Crypto.digestStringAsync(
       Crypto.CryptoDigestAlgorithm.SHA256,
       payload.password
     );
-
-    console.log("🔐 Password hash generated:", passwordHash);
+    console.log(payload.name, payload.email, passwordHash, payload.phone_number, payload.mode);
 
     await db.runAsync(
-      `INSERT INTO user (id, name, email, password, phone_number, created_at, mode)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [id, payload.name, payload.email, passwordHash, payload.phone_number ?? null, created_at, payload.mode]
+      `INSERT INTO user (name, email, password, phone_number, created_at, mode)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [payload.name, payload.email, passwordHash, payload.phone_number, payload.mode]
     );
-
-    console.log("✅ Signup successful for user ID:", id);
+    
 
     return {
       success: true,
-      message: "Signup successful",
-      user: { id, ...payload, created_at },
+      message: "Signup successful"
     };
   } catch (error: any) {
     console.error("Signup failed:", error);
@@ -89,7 +81,6 @@ export const InsertMode = async (userId: string, mode: "offline" | "online") => 
 
 export const loginOffline = async (payload: LoginPayload) => {
   try {
-    // Ensure DB is properly opened
     const db = await getDB();
     if (!db) {
       throw new Error("Database not initialized");
@@ -99,28 +90,22 @@ export const loginOffline = async (payload: LoginPayload) => {
       Crypto.CryptoDigestAlgorithm.SHA256,
       payload.password
     );
-
-    console.log("🔍 Checking user for email:", payload.email);
-
-    console.log("db:", db);
-
     // Make sure query string and table exist
     const user = await db.getFirstAsync<any>(
-      "SELECT * FROM user",
+      "SELECT * FROM user WHERE email = ?",
       [payload.email]
     );
 
-    console.log("user query result:", user);
+    console.log(user);
     
-
     if (!user) {
-      console.warn("⚠️ User not found for email:", payload.email);
+      console.warn("User not found for email:", payload.email);
       throw new Error("User not found");
     }
 
     // Make sure to check correct column name in your DB
-    if (user.password_hash !== passwordHash) {
-      console.warn("⚠️ Invalid password for user:", payload.email);
+    if (user.password !== passwordHash) {
+      console.warn("Invalid password for user:", payload.email);
       throw new Error("Invalid password");
     }
 
@@ -131,7 +116,7 @@ export const loginOffline = async (payload: LoginPayload) => {
 
     await createSession(user.id);
 
-    console.log("✅ Login successful for:", user.email);
+    console.log("Login successful for:", user.email);
     return {
       id: user.id,
       name: user.name,
@@ -140,7 +125,7 @@ export const loginOffline = async (payload: LoginPayload) => {
       mode: mode?.mode ?? "offline",
     };
   } catch (error: any) {
-    console.error("❌ Login failed:", error?.message || error);
+    console.error("Login failed:", error?.message || error);
     throw new Error(error?.message || "Login failed due to an unexpected error");
   }
 };
@@ -151,14 +136,12 @@ export const createSession = async (userId: string) => {
   const db = await getDB();
 
   await db.runAsync("DELETE FROM session");
-
-  const id = randomUUID();
   const last_login = new Date().toISOString();
 
   await db.runAsync(
-    `INSERT INTO session (id, user_id, is_logged_in, last_login)
-     VALUES (?, ?, ?, ?)`,
-    [id, userId, 1, last_login]
+    `INSERT INTO session (user_id, is_logged_in, last_login)
+     VALUES (?, ?, ?)`,
+    [userId, 1, last_login]
   );
 };
 

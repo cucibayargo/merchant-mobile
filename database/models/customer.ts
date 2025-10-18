@@ -1,5 +1,5 @@
-import { randomUUID } from "expo-crypto";
 import { getDB } from "../utils/db";
+import { unauthorizedMessage, UnauthorizedMessageType } from "../utils/message";
 import { getActiveSession } from "./auth";
 
 export type Customer = {
@@ -31,34 +31,32 @@ type PaginationResult<T> = {
 
 export const addCustomer = async (customer: CustomerPayload) => {
   const session = await getActiveSession();
-  if (!session) throw new Error("You must be logged in to add customers.");
+  if (!session) return unauthorizedMessage;
 
   const db = await getDB();
-  const id = randomUUID();
-  const created_at = new Date().toISOString();
-
   await db.runAsync(
-    `INSERT INTO customer (id, merchant_id, name, address, phone_number, email, gender, created_at) 
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO customer (merchant_id, name, address, phone_number, email, gender) 
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
-      id,
       customer.merchant_id,
       customer.name,
       customer.address ?? null,
       customer.phone_number ?? null,
       customer.email ?? null,
-      customer.gender,
-      created_at
+      customer.gender
     ]
   );
 
-  return { ...customer, created_at, id };
+  return customer;
 };
 
 export const getCustomers = async (
   page = 1,
   pageSize = 10
-): Promise<PaginationResult<Customer>> => {
+): Promise<PaginationResult<Customer> | UnauthorizedMessageType> => {
+  const session = await getActiveSession();
+  if (!session) return unauthorizedMessage;
+
   const db = await getDB();
   const offset = (page - 1) * pageSize;
 
@@ -79,7 +77,10 @@ export const getCustomers = async (
   };
 };
 
-export const getCustomerById = async (id: string): Promise<Customer | null> => {
+export const getCustomerById = async (id: number): Promise<Customer | UnauthorizedMessageType | null> => {
+  const session = await getActiveSession();
+  if (!session) return unauthorizedMessage;
+
   const db = await getDB();
   return await db.getFirstAsync<Customer>(
     "SELECT * FROM customer WHERE id = ?",
@@ -88,23 +89,28 @@ export const getCustomerById = async (id: string): Promise<Customer | null> => {
 };
 
 export const updateCustomer = async (
-  id: string,
+  id: number,
   updates: Partial<CustomerPayload>
-): Promise<Customer | null> => {
+): Promise<UnauthorizedMessageType | boolean> => {
+  const session = await getActiveSession();
+  if (!session) return unauthorizedMessage;
+
   const db = await getDB();
   const fields = Object.keys(updates)
     .map((key) => `${key} = ?`)
     .join(", ");
   const values = Object.values(updates);
-  if (fields.length === 0) return getCustomerById(id);
   await db.runAsync(
     `UPDATE customer SET ${fields} WHERE id = ?`,
     [...values, id]
   );
-  return await getCustomerById(id);
+  return true
 };
 
-export const deleteCustomer = async (id: string): Promise<void> => {
+export const deleteCustomer = async (id: number): Promise<void | UnauthorizedMessageType> => {
+  const session = await getActiveSession();
+  if (!session) return unauthorizedMessage;
+
   const db = await getDB();
   await db.runAsync("DELETE FROM customer WHERE id = ?", [id]);
 };
@@ -113,7 +119,10 @@ export const filterCustomers = async (
   keyword: string,
   page = 1,
   pageSize = 10
-): Promise<PaginationResult<Customer>> => {
+): Promise<PaginationResult<Customer> | UnauthorizedMessageType> => {
+  const session = await getActiveSession();
+  if (!session) return unauthorizedMessage;
+
   const db = await getDB();
   const param = `%${keyword}%`;
   const offset = (page - 1) * pageSize;

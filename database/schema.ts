@@ -4,9 +4,18 @@ import { getDB } from "./utils/db";
 export const initDB = async () => {
   const db = await getDB();
 
-  console.log("🧹 Resetting database schema...");
+  // Check if database already initialized
+  const tables = await db.getAllAsync<{ name: string }>(
+    "SELECT name FROM sqlite_master WHERE type='table' AND name='user';"
+  );
 
-  // Drop tables in reverse dependency order (foreign keys last)
+  if (tables.length > 0) {
+    console.log("✅ Database schema already initialized. Skipping reset...");
+    return;
+  }
+
+  console.log("🧹 Resetting and initializing database schema...");
+
   await db.execAsync(`
     PRAGMA foreign_keys = OFF;
 
@@ -15,28 +24,27 @@ export const initDB = async () => {
     DROP TABLE IF EXISTS user;
     DROP TABLE IF EXISTS duration;
     DROP TABLE IF EXISTS customer;
+    DROP TABLE IF EXISTS service;
 
     PRAGMA foreign_keys = ON;
   `);
 
-  console.log("✅ Old tables dropped. Recreating schema...");
-
-  // Recreate all tables
   await db.execAsync(`
     CREATE TABLE user (
-      id TEXT PRIMARY KEY,
+      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       name TEXT NOT NULL,
       email TEXT UNIQUE NOT NULL,
       password TEXT NOT NULL,
       phone_number TEXT,
-      created_at TEXT NOT NULL,
+      created_at TEXT DEFAULT (datetime('now')),
       mode TEXT
     );
   `);
 
   await db.execAsync(`
     CREATE TABLE user_mode (
-      user_id TEXT PRIMARY KEY,
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER NOT NULL,
       mode TEXT CHECK(mode IN ('offline', 'online')) NOT NULL,
       device_id TEXT,
       FOREIGN KEY (user_id) REFERENCES user(id)
@@ -45,35 +53,48 @@ export const initDB = async () => {
 
   await db.execAsync(`
     CREATE TABLE customer (
-      id TEXT PRIMARY KEY NOT NULL,
-      merchant_id TEXT,
+      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+      merchant_id INTEGER,
       name TEXT,
       address TEXT,
       phone_number TEXT,
       email TEXT,
       gender TEXT,
-      created_at TEXT DEFAULT (datetime('now'))
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (merchant_id) REFERENCES user(id)
     );
   `);
 
   await db.execAsync(`
     CREATE TABLE duration (
-      id TEXT PRIMARY KEY NOT NULL,
+      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       duration REAL,
-      merchant_id TEXT,
+      merchant_id INTEGER,
       name TEXT,
       type TEXT,
-      created_at TEXT DEFAULT (datetime('now'))
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (merchant_id) REFERENCES user(id)
     );
   `);
 
   await db.execAsync(`
     CREATE TABLE session (
-      id TEXT PRIMARY KEY,
-      user_id TEXT,
+      id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+      user_id INTEGER NOT NULL,
       is_logged_in INTEGER DEFAULT 0,
       last_login TEXT,
       FOREIGN KEY (user_id) REFERENCES user(id)
+    );
+  `);
+
+  await db.execAsync(`
+    CREATE TABLE service (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      unit TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      merchant_id INTEGER,
+      name TEXT,
+      FOREIGN KEY (merchant_id) REFERENCES user(id)
     );
   `);
 

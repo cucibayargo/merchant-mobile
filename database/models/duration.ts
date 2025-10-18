@@ -1,8 +1,9 @@
-import { randomUUID } from "expo-crypto";
 import { getDB } from "../utils/db";
+import { unauthorizedMessage, UnauthorizedMessageType } from "../utils/message";
+import { getActiveSession } from "./auth";
 
 export type Duration = {
-  id: string;
+  id: number;
   duration?: number | null;
   merchant_id?: string | null;
   created_at: string;
@@ -11,10 +12,10 @@ export type Duration = {
 };
 
 export type DurationPayload = {
-  duration?: number | null;
-  merchant_id?: string | null;
-  name?: string | null;
-  type?: string | null;
+  duration: number;
+  merchant_id: string;
+  name: string;
+  type: string;
 };
 
 type PaginationResult<T> = {
@@ -26,31 +27,32 @@ type PaginationResult<T> = {
 
 // Add duration
 export const addDuration = async (payload: DurationPayload) => {
-  const db = await getDB();
-  const id = randomUUID();
-  const created_at = new Date().toISOString();
+  const session = await getActiveSession();
+  if (!session) return unauthorizedMessage;
 
+  const db = await getDB();
   await db.runAsync(
-    `INSERT INTO duration (id, duration, merchant_id, name, type, created_at) 
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO duration (duration, merchant_id, name, type) 
+     VALUES (?, ?, ?, ?)`,
     [
-      id,
-      payload.duration ?? null,
-      payload.merchant_id ?? null,
-      payload.name ?? null,
-      payload.type ?? null,
-      created_at,
+      payload.duration,
+      payload.merchant_id,
+      payload.name,
+      payload.type
     ]
   );
 
-  return { ...payload, id, created_at };
+  return payload;
 };
 
 // Get all durations with pagination
 export const getDurations = async (
   page = 1,
   pageSize = 10
-): Promise<PaginationResult<Duration>> => {
+): Promise<PaginationResult<Duration> | UnauthorizedMessageType> => {
+  const session = await getActiveSession();
+  if (!session) return unauthorizedMessage;
+
   const db = await getDB();
   const offset = (page - 1) * pageSize;
 
@@ -72,7 +74,10 @@ export const getDurations = async (
 };
 
 // Get single duration by ID
-export const getDurationById = async (id: string): Promise<Duration | null> => {
+export const getDurationById = async (id: number): Promise<Duration | UnauthorizedMessageType | null> => {
+  const session = await getActiveSession();
+  if (!session) return unauthorizedMessage;
+
   const db = await getDB();
   return await db.getFirstAsync<Duration>(
     "SELECT * FROM duration WHERE id = ?",
@@ -84,7 +89,10 @@ export const getDurationById = async (id: string): Promise<Duration | null> => {
 export const updateDuration = async (
   id: string,
   updates: Partial<DurationPayload>
-): Promise<Duration | null> => {
+): Promise<UnauthorizedMessageType | boolean> => {
+  const session = await getActiveSession();
+  if (!session) return unauthorizedMessage;
+
   const db = await getDB();
 
   const fields = Object.keys(updates)
@@ -92,18 +100,19 @@ export const updateDuration = async (
     .join(", ");
   const values = Object.values(updates);
 
-  if (fields.length === 0) return getDurationById(id);
-
   await db.runAsync(
     `UPDATE duration SET ${fields} WHERE id = ?`,
     [...values, id]
   );
 
-  return await getDurationById(id);
+  return true
 };
 
 // Delete duration
-export const deleteDuration = async (id: string): Promise<void> => {
+export const deleteDuration = async (id: number): Promise<void | UnauthorizedMessageType> => {
+  const session = await getActiveSession();
+  if (!session) return unauthorizedMessage;
+
   const db = await getDB();
   await db.runAsync("DELETE FROM duration WHERE id = ?", [id]);
 };
@@ -113,7 +122,10 @@ export const filterDurations = async (
   keyword: string,
   page = 1,
   pageSize = 10
-): Promise<PaginationResult<Duration>> => {
+): Promise<PaginationResult<Duration> | UnauthorizedMessageType> => {
+  const session = await getActiveSession();
+  if (!session) return unauthorizedMessage;
+
   const db = await getDB();
   const param = `%${keyword}%`;
   const offset = (page - 1) * pageSize;
